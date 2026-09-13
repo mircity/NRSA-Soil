@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoreLog 2 — Subsoil Investigation Suite</title>
+<style>
+:root{
+  --ink:#1B3A6B; --ink-2:#44577A; --paper:#E9EEEE; --panel:#FFF;
+  --rule:#C3CFD2; --rule-2:#DDE5E6; --water:#2E7FA8; --sand:#C08A2E; --leaf:#2E7D32;
+  --alert:#A63A18; --ok:#2E7D32; --warn:#8A6100;
+  --shadow:0 1px 2px rgba(22,50,63,.08), 0 8px 24px rgba(22,50,63,.06);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Noto Sans Bengali","Segoe UI",-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:50;background:var(--ink);color:#EAF0F1;border-bottom:2px solid #0C2029;display:flex;align-items:center;gap:16px;padding:10px 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:9px;margin-right:auto}
+.brand b{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.02em}
+.brand span{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:#8FAAB3}
+button,.filebtn{font-family:var(--sans);font-size:12.5px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);padding:6px 12px;border-radius:3px;cursor:pointer;transition:background .12s,border-color .12s}
+button:hover,.filebtn:hover{background:#F4F8F8;border-color:var(--ink-2)}
+button:focus-visible,.filebtn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--water);outline-offset:1px}
+button.primary{background:var(--water);border-color:var(--water);color:#fff}
+button.primary:hover{background:#25688B}
+button.ghost{background:transparent;border-color:#4A6975;color:#CBDCE1}
+button.ghost:hover{background:#204250;color:#fff}
+.filebtn{display:inline-block}.filebtn input{display:none}
+.bar-actions{display:flex;gap:7px;flex-wrap:wrap}
+.wrap{display:grid;grid-template-columns:274px 1fr;min-height:calc(100vh - 52px)}
+aside{background:#F5F8F8;border-right:1px solid var(--rule);padding:14px 0 30px;position:sticky;top:52px;align-self:start;max-height:calc(100vh - 52px);overflow:auto}
+aside h3{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px 14px;font-weight:600}
+main{padding:18px 24px 60px;max-width:1220px}
+nav.tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule);margin-bottom:18px;flex-wrap:wrap}
+nav.tabs button{border:none;border-bottom:2px solid transparent;background:none;padding:9px 13px;font-size:13.5px;border-radius:0;color:var(--ink-2)}
+nav.tabs button:hover{background:#DFE7E8}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--water);font-weight:600}
+.panel{display:none}.panel.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);margin-bottom:16px}
+.card>h2{margin:0;padding:11px 15px;border-bottom:1px solid var(--rule-2);font-family:var(--serif);font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
+.card>h2 .num{font-family:var(--mono);font-size:10px;color:#fff;background:var(--ink);padding:2px 6px;border-radius:2px}
+.card .body{padding:13px 15px}
+.hint{font-size:12px;color:var(--ink-2);margin:0 0 11px}
+.grid{display:grid;gap:11px 16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+label{display:block;font-size:11.5px;letter-spacing:.03em;color:var(--ink-2);margin-bottom:3px}
+label .u{color:#93A7AD;font-family:var(--mono);font-size:10.5px}
+input,select,textarea{width:100%;font-family:var(--sans);font-size:13.5px;color:var(--ink);padding:6px 8px;border:1px solid var(--rule);border-radius:3px;background:#FCFDFD}
+input[type=number]{font-family:var(--mono)}
+input:focus,select:focus{background:#fff;border-color:var(--water)}
+.tblwrap{overflow-x:auto;border:1px solid var(--rule);border-radius:4px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--rule-2);padding:5px 7px;text-align:center;white-space:nowrap}
+thead th{background:var(--ink);color:#E7EEEF;font-weight:600;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;border-bottom:none;padding:7px}
+thead th small{display:block;font-weight:400;text-transform:none;letter-spacing:0;color:#93B0B9;font-size:10px}
+tbody tr:nth-child(even) td{background:#F7FAFA}
+tbody tr:hover td{background:#EDF4F5}
+td.num,th.num{font-family:var(--mono)}
+td.calc{color:var(--ink-2);background:#F4F8F8!important}
+td input,td select{border:1px solid transparent;background:transparent;padding:3px 5px;font-size:12.5px;text-align:center}
+td input:hover,td select:hover{border-color:var(--rule)}
+td input:focus,td select:focus{background:#fff;border-color:var(--water)}
+td.desc{text-align:left;min-width:230px}td.desc input{text-align:left}
+.rowbtn{border:none;background:none;color:#9AAEB4;padding:2px 5px;font-size:15px;line-height:1}
+.rowbtn:hover{background:#FBF0EC;color:var(--alert)}
+.tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:1px 5px;border-radius:2px}
+.tag.clay{background:#F1EFEA;color:#5C5245}.tag.sand{background:#FBF2DF;color:#7A5510}
+.tag.ref{background:#FBE5E1;color:#8C2F11;font-weight:700}
+.holes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.holes button{padding:5px 13px;border-radius:14px;font-size:12.5px}
+.holes button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.strata{padding:0 10px}.strata svg{width:100%;height:auto;display:block}
+.legend{margin:10px 14px 0;font-size:11px;color:var(--ink-2);line-height:1.7}
+.legend i{display:inline-block;width:11px;height:11px;border:1px solid var(--rule);vertical-align:-2px;margin-right:6px;border-radius:1px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.stat{background:var(--panel);padding:9px 11px}
+.stat b{display:block;font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:-.02em}
+.stat span{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+table.matrix td{font-family:var(--mono)}
+table.matrix th:first-child,table.matrix td:first-child{background:#EDF3F4;font-weight:600}
+.cellna{color:#A9B7BB;font-style:italic}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0}
+.vbox{border:1px solid var(--rule);border-radius:4px;padding:13px 15px;background:var(--panel)}
+.vbox h4{margin:0 0 4px;font-size:12.5px;font-family:var(--sans);color:var(--ink-2);font-weight:600}
+.vbox .big{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.vbox .sub{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.vbox.pass{border-left:4px solid var(--ok)}.vbox.pass .big{color:var(--ok)}
+.vbox.marg{border-left:4px solid var(--warn)}.vbox.marg .big{color:var(--warn)}
+.vbox.fail{border-left:4px solid var(--alert)}.vbox.fail .big{color:var(--alert)}
+.warn{background:#FDF3EF;border:1px solid #E8CCC1;color:#7E2E11;padding:9px 12px;border-radius:3px;font-size:12.5px;margin-bottom:12px}
+.note{background:#F0F6F8;border-left:3px solid var(--water);padding:9px 12px;font-size:12.5px;margin:11px 0}
+#reportView{background:#fff;border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);padding:42px 50px;font-family:var(--serif);font-size:14px;line-height:1.6;color:#111}
+#reportView h1{font-size:22px;text-align:center;margin:0 0 4px}
+#reportView h2{font-size:15px;color:var(--ink);border-bottom:1px solid var(--rule);padding-bottom:4px;margin:24px 0 9px}
+#reportView h3{font-size:13px;margin:15px 0 6px;color:var(--ink-2)}
+#reportView table{font-family:var(--sans);font-size:11.5px;margin:9px 0}
+#reportView th{background:var(--ink);color:#fff;text-transform:none;letter-spacing:0;font-size:11px}
+#reportView td{border:1px solid var(--rule-2)}
+#reportView .cap{text-align:center;font-size:11.5px;font-style:italic;color:#555;margin:2px 0 15px}
+#reportView ul{margin:6px 0 11px;padding-left:22px}#reportView li{margin-bottom:5px}
+#reportView .sig{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+#reportView .sig div{border-top:1px solid #444;padding-top:5px;font-size:12px}
+footer{padding:16px 24px;font-size:11.5px;color:#7E9098;border-top:1px solid var(--rule)}
+@media(max-width:920px){.wrap{grid-template-columns:1fr}aside{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--rule)}.g4,.g3{grid-template-columns:repeat(2,1fr)}#reportView{padding:22px}}
+.pagebreak{height:0;border-top:1px dashed #C3CFD2;margin:26px 0}
+#reportView .pagebreak::after{content:"— page break —";display:block;text-align:center;font-size:9px;color:#B0BEC2;margin-top:-8px;background:#fff;width:110px;margin-left:auto;margin-right:auto;font-family:var(--sans)}
+.lh-space{height:0}
+/* running footer — sits once at the foot on screen; fixed in print so it repeats on every page */
+#reportView table.pagewrap{width:100%;border-collapse:collapse;table-layout:fixed}
+#reportView table.pagewrap>tbody>tr>td,#reportView table.pagewrap>tfoot>tr>td{border:none;padding:0;text-align:left;white-space:normal}
+#reportView .runfoot{border-top:1.2px solid var(--ink);margin-top:26px;padding-top:5px;
+  display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:9px;color:#333;line-height:1.5}
+#reportView .ft-logo{height:36px;flex:0 0 auto}
+#reportView .ft-text{flex:1 1 auto;text-align:left}
+#reportView .titlepage{display:flex;flex-direction:column;text-align:center;min-height:900px;padding-top:6px}
+#reportView .tp-top{flex:0 0 auto}
+#reportView .tp-bottom{margin-top:auto;padding-bottom:4px}
+#reportView .reportedby{margin-top:8px}
+#reportView .reportedby img{height:86px;margin-bottom:4px}
+#reportView .rb-name{font-size:19px;font-weight:bold;color:#1B3A6B;letter-spacing:.02em}
+#reportView .rb-tag{font-size:10.5px;color:#2E7D32;letter-spacing:.07em;font-family:var(--sans);margin-top:1px}
+#reportView .rb-addr{font-size:10.5px;font-family:var(--sans);margin-top:3px;line-height:1.5}
+#reportView .ft-lbl{font-weight:700;color:#1B3A6B}
+#reportView .ft-tag{color:#2E7D32}
+body.letterhead #reportView .lh-space{height:var(--lh-top,34mm)}
+body.letterhead #reportView .lh-foot{height:var(--lh-bot,18mm)}
+#reportView .lh-space,#reportView .lh-foot{position:relative}
+body.letterhead #reportView .lh-space::after{content:"— letterhead area —";position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:#C3CFD2;font-family:var(--sans)}
+@media print{
+#reportView table.pagewrap>tfoot{display:table-footer-group}
+#reportView .titlepage{min-height:262mm;page-break-after:always;padding-top:0}
+#reportView .reportedby img{height:24mm}
+#reportView .runfoot{margin:0;padding:0.6mm 0 0;font-size:6pt;gap:4px;line-height:1.2;border-top-width:0.7px}
+#reportView .ft-logo{height:7.5mm}
+#reportView .ft-text div{margin:0}
+
+body.letterhead #reportView .lh-space::after{content:none}
+.pagebreak{page-break-after:always;break-after:page;height:0;border:none;margin:0}
+#reportView .pagebreak::after{content:none}
+@page{size:A4;margin:11mm 15mm 5mm 15mm}
+header,aside,nav.tabs,.bar-actions,footer,.no-print{display:none!important}body{background:#fff}.wrap{display:block}main{padding:0;max-width:none}#reportView{border:none;box-shadow:none;padding:0}.panel{display:none!important}.panel.on{display:block!important}thead{display:table-header-group}tr{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>BoreLog&nbsp;2</b><span>Subsoil Investigation Suite</span></div>
+  <div class="bar-actions">
+    <button class="ghost" id="btnSample">নমুনা প্রজেক্ট</button>
+    <button class="ghost" id="btnReal">Savar G+12 (আসল ডেটা)</button>
+    <button class="ghost" id="btnClear">সব মুছুন</button>
+    <label class="filebtn ghost" style="border:1px solid #4A6975;background:transparent;color:#CBDCE1;padding:6px 12px;border-radius:3px">
+      খুলুন<input type="file" id="fileOpen" accept=".html,.json"></label>
+    <button class="ghost" id="btnSave">সেভ (.html)</button>
+    <button class="ghost" id="btnCsv">CSV</button>
+    <button class="primary" id="btnWord">Word</button>
+    <button class="primary" id="btnPrint">Print / PDF</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <h3>Strata — all boreholes</h3>
+    <div class="strata" id="strataCol"></div>
+    <div class="legend">
+      <i style="background:#F0EDE6"></i>Cohesive / clay–silt<br>
+      <i style="background:#FAF2DE"></i>Cohesionless / sand<br>
+      <i style="background:#2E7FA8;border-color:#2E7FA8"></i>Ground water table
+    </div>
+  </aside>
+
+  <main>
+    <nav class="tabs" id="tabs">
+      <button data-t="p1" aria-selected="true">১ · প্রজেক্ট</button>
+      <button data-t="p2" aria-selected="false">২ · বোরলগ</button>
+      <button data-t="p3" aria-selected="false">৩ · Bearing</button>
+      <button data-t="p4" aria-selected="false">৪ · Settlement</button>
+      <button data-t="p5" aria-selected="false">৫ · Pile</button>
+      <button data-t="p6" aria-selected="false">৬ · ল্যাব টেস্ট</button>
+      <button data-t="p7" aria-selected="false">৭ · রিপোর্ট</button>
+    </nav>
+
+    <!-- ===== 1 PROJECT ===== -->
+    <section class="panel on" id="p1">
+      <div class="card"><h2><span class="num">01</span>প্রজেক্ট পরিচিতি</h2><div class="body">
+        <div class="grid g3">
+          <div><label>প্রজেক্টের নাম</label><input id="f_project"></div>
+          <div><label>লোকেশন</label><input id="f_location"></div>
+          <div><label>ক্লায়েন্ট</label><input id="f_client"></div>
+          <div><label>রিপোর্ট নম্বর</label><input id="f_repno"></div>
+          <div><label>তারিখ</label><input id="f_date"></div>
+          <div><label>প্রস্তাবিত কাঠামো</label><input id="f_struct"></div>
+          <div><label>প্রতিষ্ঠান</label><input id="f_firm"></div>
+          <div><label>ঠিকানা</label><input id="f_addr"></div>
+          <div><label>ইমেইল</label><input id="f_email"></div>
+          <div><label>মোবাইল</label><input id="f_mobile"></div>
+          <div><label>ট্যাগলাইন</label><input id="f_tagline"></div>
+          <div><label>স্বাক্ষরকারী — নাম</label><input id="f_engineer"></div>
+          <div><label>স্বাক্ষরকারী — পদবি</label><input id="f_engtitle"></div>
+          <div><label>বোরিং পদ্ধতি</label><select id="f_method">
+            <option>Manual drive (hand wash)</option><option>Wash boring</option>
+            <option>Rotary drilling</option><option>Percussion boring</option></select></div>
+        </div></div></div>
+
+      <div class="card"><h2><span class="num">02</span>প্রিন্ট ও প্যাড সেটিং</h2><div class="body">
+        <p class="hint">সাদা কাগজে প্রিন্ট করলে রিপোর্ট নিজেই প্রতি পৃষ্ঠার নিচে লোগো ও কোম্পানির তথ্য ছাপবে। ভবিষ্যতে ছাপানো প্যাড হলে দ্বিতীয় অপশনটি বেছে নেবেন।</p>
+        <div class="grid g4">
+          <div><label>কাগজের ধরন</label><select id="f_lh">
+            <option value="no">সাদা কাগজ — হেডার ও ফুটার ছাপা হবে</option>
+            <option value="yes">ছাপানো প্যাড — শুধু জায়গা ফাঁকা রাখবে</option></select></div>
+          <div><label>উপরের মার্জিন <span class="u">mm</span></label><input id="f_lhtop" type="number" step="1"></div>
+          <div><label>নিচের মার্জিন <span class="u">mm</span></label><input id="f_lhbot" type="number" step="1"></div>
+          <div><label>লোগো <span class="u">হেডারে বসবে</span></label>
+            <label class="filebtn" style="text-align:center">লোগো নির্বাচন<input type="file" id="logoFile" accept="image/*"></label></div>
+        </div>
+        <div id="logoPrev" style="margin-top:10px"></div>
+      </div></div>
+
+      <div class="card"><h2><span class="num">03</span>ভূগর্ভস্থ অবস্থা</h2><div class="body">
+        <div class="warn" id="gwtWarn" style="display:none"></div>
+        <div class="grid g4">
+          <div><label>GWT গভীরতা <span class="u">ft</span></label><input id="f_gwt" type="number" step="0.5"></div>
+          <div><label>স্যাম্পলিং ব্যবধান <span class="u">ft</span></label><input id="f_int" type="number" step="0.5"></div>
+          <div><label>একক ওজন — উপরের স্তর <span class="u">pcf</span></label><input id="f_gup" type="number" step="0.1"></div>
+          <div><label>একক ওজন — নিচের স্তর <span class="u">pcf</span></label><input id="f_glo" type="number" step="0.1"></div>
+          <div><label>Compressible স্তরের তলা <span class="u">ft</span></label><input id="f_hbase" type="number" step="1"></div>
+          <div><label>পানির একক ওজন <span class="u">pcf</span></label><input id="f_gw" type="number" step="0.1"></div>
+        </div></div></div>
+
+      <div class="card"><h2><span class="num">04</span>SPT সংশোধন ও কোরিলেশন</h2><div class="body">
+        <p class="hint">N₆₀ = N × (E<sub>m</sub>/60) × C<sub>B</sub> × C<sub>S</sub> × C<sub>R</sub>&nbsp; ·&nbsp; C<sub>N</sub> = √(2000/σ′<sub>v</sub>) ≤ 1.70&nbsp; ·&nbsp; c<sub>u</sub>(tsf) = ratio × N<sub>field</sub></p>
+        <div class="grid g4">
+          <div><label>হ্যামার</label><select id="f_hammer">
+            <option value="45">Donut / hand wash — 45%</option>
+            <option value="60">Safety hammer — 60%</option>
+            <option value="80">Automatic trip — 80%</option></select></div>
+          <div><label>C<sub>B</sub></label><select id="f_cb">
+            <option value="1.00">65–115 mm — 1.00</option><option value="1.05">150 mm — 1.05</option>
+            <option value="1.15">200 mm — 1.15</option></select></div>
+          <div><label>C<sub>S</sub></label><select id="f_cs">
+            <option value="1.00">Standard — 1.00</option><option value="1.20">No liner — 1.20</option></select></div>
+          <div><label>c<sub>u</sub>/N অনুপাত <span class="u">tsf</span></label><input id="f_cur" type="number" step="0.0025"></div>
+        </div></div></div>
+
+      <div class="card"><h2><span class="num">05</span>ডিজাইন প্যারামিটার</h2><div class="body">
+        <div class="grid g4">
+          <div><label>C<sub>c</sub> — compression index</label><input id="f_cc" type="number" step="0.001"></div>
+          <div><label>C<sub>r</sub> — recompression</label><input id="f_cr" type="number" step="0.001"></div>
+          <div><label>e₀ — initial void ratio</label><input id="f_e0" type="number" step="0.001"></div>
+          <div><label>p<sub>c</sub> — pre-consolidation <span class="u">psf</span></label><input id="f_pc" type="number" step="50" placeholder="Casagrande থেকে"></div>
+          <div><label>E<sub>s</sub> <span class="u">ksf</span></label><input id="f_es" type="number" step="10"></div>
+          <div><label>FS — বিকল্প A</label><input id="f_fsa" type="number" step="0.25"></div>
+          <div><label>FS — বিকল্প B</label><input id="f_fsb" type="number" step="0.25"></div>
+          <div><label>FS — pile</label><input id="f_fsp" type="number" step="0.25"></div>
+          <div><label>অনুমোদিত settlement <span class="u">mm</span></label><input id="f_sall" type="number" step="5"></div>
+        </div></div></div>
+    </section>
+
+    <!-- ===== 2 BORELOG ===== -->
+    <section class="panel" id="p2">
+      <div class="stats" id="stats"></div>
+      <div id="dataWarn"></div>
+      <div class="card"><h2><span class="num">05</span>বোরহোল ডেটা</h2><div class="body">
+        <div class="holes" id="holeTabs"></div>
+        <p class="hint">শুধু <b>গভীরতা</b>, <b>বর্ণনা</b>, <b>ধরন</b>, <b>N</b> বসান। একক ওজন খালি রাখলে স্তর অনুযায়ী নেওয়া হবে। N = 50 হলে refusal ধরে সতর্কবার্তা দেখাবে।</p>
+        <div class="tblwrap"><table id="logTable"><thead><tr>
+          <th>Depth<small>ft</small></th><th>Depth<small>m</small></th>
+          <th class="desc" style="text-align:left">মাটির বর্ণনা</th><th>ধরন</th>
+          <th>N<small>field</small></th><th>γ<small>pcf</small></th><th>σ′v<small>psf</small></th>
+          <th>C<sub>R</sub></th><th>N₆₀</th><th>C<sub>N</sub></th><th>N₁₍₆₀₎</th>
+          <th>Consistency / density</th><th>φ<small>deg</small></th><th>c<sub>u</sub><small>tsf</small></th><th></th>
+        </tr></thead><tbody id="logBody"></tbody></table></div>
+        <div style="margin-top:10px;display:flex;gap:7px">
+          <button id="btnAdd">+ সারি</button><button id="btnAdd5">+ ৫ সারি</button>
+        </div></div></div>
+
+      <div class="card"><h2><span class="num">06</span>সব বোরহোলের N₆₀ তুলনা</h2>
+        <div class="body"><div id="cmpTable"></div></div></div>
+
+      <div class="card"><h2><span class="num">07</span>N₆₀ ও N₁₍₆₀₎ vs গভীরতা</h2>
+        <div class="body"><div id="chart"></div></div></div>
+    </section>
+
+    <!-- ===== 3 BEARING ===== -->
+    <section class="panel" id="p3">
+      <div class="card"><h2><span class="num">08</span>Shallow foundation — bearing capacity</h2><div class="body">
+        <p class="hint">q<sub>net(ult)</sub> = 5.14 · c<sub>u</sub> · (1 + 0.2 B/L) · min(1.5, 1 + 0.2 D<sub>f</sub>/B) — Skempton / Meyerhof।</p>
+        <div class="grid g4" style="margin-bottom:12px">
+          <div><label>Founding depth D<sub>f</sub> <span class="u">ft</span></label><input id="f_df" type="number" step="0.5"></div>
+          <div><label>B/L অনুপাত</label><input id="f_bl" type="number" step="0.1"></div>
+          <div><label>Footing widths B <span class="u">ft</span></label><input id="f_Bs"></div>
+          <div><label>c<sub>u</sub> উৎস</label><select id="f_cusrc">
+            <option value="uc">UC টেস্ট থেকে (মাপা)</option>
+            <option value="mean">সব বোরহোলের গড় (SPT correlation)</option><option value="min">সবচেয়ে দুর্বল বোরহোল</option>
+            <option value="active">চলতি বোরহোল</option></select></div>
+        </div>
+        <div id="bearingOut"></div>
+      </div></div>
+    </section>
+
+    <!-- ===== 4 SETTLEMENT ===== -->
+    <section class="panel" id="p4">
+      <div class="note no-print">মূল রিপোর্টে এই হিসাবটাই বাদ পড়েছিল। C<sub>c</sub> আর C<sub>r</sub> — দুটো উত্তরই পাশাপাশি দেখানো হয়, কারণ কোনটা খাটবে তা নির্ভর করে p<sub>c</sub>-র ওপর।</div>
+      <div class="card"><h2><span class="num">09</span>Settlement check</h2><div class="body">
+        <div class="grid g4" style="margin-bottom:12px">
+          <div><label>Footing B <span class="u">ft</span></label><input id="f_sb" type="number" step="0.5"></div>
+          <div><label>Footing L <span class="u">ft</span></label><input id="f_sl" type="number" step="0.5"></div>
+          <div><label>Net চাপ q <span class="u">ksf</span></label><input id="f_sq" type="number" step="0.05"></div>
+          <div><label>অথবা কলাম লোড <span class="u">kip — দিলে B হিসাব হবে</span></label><input id="f_sp" type="number" step="10" placeholder="খালি রাখুন"></div>
+        </div>
+        <div id="settleOut"></div>
+      </div></div>
+      <div class="card"><h2><span class="num">10</span>Footing width sensitivity</h2>
+        <div class="body"><div id="sensOut"></div></div></div>
+    </section>
+
+    <!-- ===== 5 PILE ===== -->
+    <section class="panel" id="p5">
+      <div class="card"><h2><span class="num">11</span>Pile capacity</h2><div class="body">
+        <div class="grid g4" style="margin-bottom:12px">
+          <div><label>ব্যাস <span class="u">mm</span></label><input id="f_pd" type="number" step="25"></div>
+          <div><label>ধরন</label><select id="f_ptype">
+            <option value="bored">Bored / cast-in-situ</option><option value="driven">Driven</option></select></div>
+          <div><label>Skin coeff. K <span class="u">fs = K·N₆₀ kPa</span></label><input id="f_ks" type="number" step="0.1"></div>
+          <div><label>সর্বোচ্চ f<sub>s</sub> <span class="u">kPa</span></label><input id="f_fsmax" type="number" step="5"></div>
+          <div><label>সর্বোচ্চ end bearing <span class="u">kPa</span></label><input id="f_qbmax" type="number" step="250"></div>
+          <div><label>কলাম লোড <span class="u">kip</span></label><input id="f_pload" type="number" step="10"></div>
+          <div><label>Recommendation টেবিলের ব্যাস <span class="u">inch, কমা দিয়ে</span></label><input id="f_pdlist" type="text" value="18,20,24"></div>
+        </div>
+        <div id="pileOut"></div>
+      </div></div>
+
+      <div class="card"><h2><span class="num">11A</span>Recommendation — অতিরিক্ত অপশন</h2><div class="body">
+        <div class="grid g4" style="margin-bottom:12px">
+          <div style="grid-column:span 2"><label>Shallow foundation বিবরণ</label><input id="f_shdesc" type="text" value="Continuous wall/RCC Strip as well as Isolated type footing"></div>
+          <div><label>Cut of Level <span class="u">ft, EGL থেকে</span></label><input id="f_cutlvl" type="number" step="0.5"></div>
+        </div>
+        <div class="grid g4" style="margin-bottom:6px">
+          <div><label><input id="f_usesand" type="checkbox" style="width:auto;vertical-align:middle"> Sand pile অপশন যোগ করুন</label></div>
+          <div><label>Sand pile ব্যাস <span class="u">inch</span></label><input id="f_spdia" type="number" step="0.5"></div>
+          <div><label>Compaction শুরু <span class="u">ft from EGL</span></label><input id="f_spstart" type="number" step="1"></div>
+          <div><label>Embedment length <span class="u">ft</span></label><input id="f_spembed" type="number" step="1"></div>
+          <div><label>Spacing c/c <span class="u">যেমন 1'-6"</span></label><input id="f_spspacing" type="text" value="1'-6&quot;"></div>
+          <div><label>ফলে bearing capacity <span class="u">tsf</span></label><input id="f_spcap" type="number" step="0.05"></div>
+        </div>
+        <div class="grid g4">
+          <div><label><input id="f_useprecast" type="checkbox" style="width:auto;vertical-align:middle"> Pre-cast pile অপশন যোগ করুন</label></div>
+          <div><label>মাপ</label><input id="f_pcsize" type="text" value="8&quot; X 8&quot;"></div>
+          <div><label>গভীরতা <span class="u">ft, cut level থেকে</span></label><input id="f_pcdepth" type="number" step="1"></div>
+          <div><label>প্রযোজ্য বোরিং</label><input id="f_pcbh" type="text" placeholder="যেমন Bh-1 & 2"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ===== 6 LAB ===== -->
+    <section class="panel" id="p6">
+      <div class="verdict no-print"><div class="vbox" id="labBadge"></div></div>
+      <div class="card"><h2><span class="num">12</span>Index properties — grain size, Atterberg, specific gravity
+        <span style="margin-left:auto"><button id="btnAddIdx">+ সারি</button></span></h2>
+        <div class="body"><p class="hint">প্রতিটি disturbed স্যাম্পলের ফলাফল। খালি ঘর রাখলে রিপোর্টে "—" আসবে।</p>
+        <div class="tblwrap"><table id="tIdx"><thead><tr>
+          <th>BH</th><th>Sample</th><th>Depth<small>ft</small></th><th>NMC<small>%</small></th>
+          <th>LL<small>%</small></th><th>PI<small>%</small></th><th>PL<small>%</small></th>
+          <th>Sand<small>%</small></th><th>Silt<small>%</small></th><th>Clay<small>%</small></th>
+          <th>G<sub>s</sub></th><th class="desc" style="text-align:left">Classification</th>
+          <th>A-line</th><th></th></tr></thead><tbody id="bIdx"></tbody></table></div></div></div>
+
+      <div class="card"><h2><span class="num">13</span>Unconfined compression
+        <span style="margin-left:auto"><button id="btnAddUc">+ সারি</button></span></h2>
+        <div class="body"><div class="tblwrap"><table id="tUc"><thead><tr>
+          <th>BH</th><th>Sample</th><th>Depth<small>ft</small></th><th>q<sub>u</sub><small>psi</small></th>
+          <th>Strain<small>%</small></th><th>Wet γ<small>pcf</small></th><th>Dry γ<small>pcf</small></th>
+          <th>NMC<small>%</small></th><th>q<sub>u</sub><small>ksf</small></th><th>c<sub>u</sub><small>ksf</small></th>
+          <th>c<sub>u</sub><small>kPa</small></th><th>Consistency</th><th></th>
+        </tr></thead><tbody id="bUc"></tbody></table></div></div></div>
+
+      <div class="card"><h2><span class="num">14</span>Direct shear
+        <span style="margin-left:auto"><button id="btnAddDs">+ সারি</button></span></h2>
+        <div class="body"><div class="tblwrap"><table id="tDs"><thead><tr>
+          <th>BH</th><th>Sample</th><th>Depth<small>ft</small></th><th>φ<small>deg</small></th>
+          <th>c<small>psi</small></th><th>c<small>ksf</small></th><th>ডিজাইনে c</th><th></th>
+        </tr></thead><tbody id="bDs"></tbody></table></div>
+        <p class="hint">পরিষ্কার বালিতে প্রকৃত cohesion শূন্য — intercept টেস্ট scatter। ডিজাইনে c = 0 ধরুন।</p></div></div>
+
+      <div class="card"><h2><span class="num">15</span>Consolidation
+        <span style="margin-left:auto"><button id="btnAddCon">+ সারি</button></span></h2>
+        <div class="body"><div class="tblwrap"><table id="tCon"><thead><tr>
+          <th>BH</th><th>Depth<small>ft</small></th><th>G<sub>s</sub></th><th>Dry γ<small>pcf</small></th>
+          <th>NMC<small>%</small></th><th>e₀</th><th>C<sub>c</sub></th><th>C<sub>r</sub></th>
+          <th>p<sub>c</sub><small>psf</small></th><th>c<sub>v</sub><small>ft²/day</small></th><th></th>
+        </tr></thead><tbody id="bCon"></tbody></table></div>
+        <div id="pcNote"></div></div></div>
+
+      <div class="card"><h2><span class="num">16</span>Range of variation — রিপোর্টের Table</h2>
+        <div class="body"><div id="rangeOut"></div></div></div>
+    </section>
+
+    <!-- ===== 7 REPORT ===== -->
+    <section class="panel" id="p7">
+      <div class="note no-print">১৮-সেকশন Bangladesh format, সাথে অ্যাটাচমেন্ট A–G। নিচে সরাসরি এডিট করা যায়, তারপর Word বা PDF নিন।</div>
+      <div class="verdict no-print"><div class="vbox" id="pageBadge"></div></div>
+      <div id="reportView" contenteditable="true" spellcheck="false"></div>
+    </section>
+  </main>
+</div>
+<footer>BoreLog 2 — অফলাইনে চলে, কোনো ডেটা কোথাও পাঠানো হয় না। ASTM D1586 · Skempton (1986) · Liao &amp; Whitman (1986) · Wolff (1989) · Terzaghi &amp; Peck · Meyerhof (1956, 1976) · BNBC 2020 Part 6 Ch. 3।</footer>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const KSF_KPA=47.88, KPA_KSF=0.020885, FT_M=0.3048, KIP_KN=4.4482, MM_FT=304.8;
+const num = v => { const n=parseFloat(v); return isFinite(n)?n:null; };
+const fmt = (v,d=2) => (v===null||v===undefined||!isFinite(v))?"":v.toFixed(d);
+const esc = s => String(s==null?"":s).replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+
+const FIELDS=["project","location","client","repno","date","struct","firm","addr","email","mobile",
+"tagline","engineer","engtitle","lh","lhtop","lhbot","method",
+"gwt","int","gup","glo","hbase","gw","hammer","cb","cs","cur","cc","cr","e0","es",
+"fsa","fsb","fsp","sall","pc","df","bl","Bs","cusrc","sb","sl","sq","sp","pd","ptype","ks","fsmax","qbmax","pload","pdlist",
+"shdesc","cutlvl","usesand","spdia","spstart","spembed","spspacing","spcap","useprecast","pcsize","pcdepth","pcbh"];
+const CHK_FIELDS=["usesand","useprecast"];
+const V = k => $("f_"+k).value;
+const N = k => num($("f_"+k).value) ?? 0;
+const Chk = k => !!($("f_"+k) && $("f_"+k).checked);
+
+const DEFAULTS={project:"Proposed 7 (Seven) Storied Residential Building",
+location:"502 North Ibrahimpur, Dhaka Cantonment, Kafrul, Dhaka-1206",
+client:"", repno:"", date:"April 2026", struct:"7-storied residential building",
+firm:"Heritage Geo-technical Solution",
+addr:"Plot no-140, Flat no-3D, Avenue-08, Block-E, Section-11, Thana-Pallabi, Mirpur, Dhaka-1216",
+email:"heritagearchitectsltd@gmail.com", mobile:"+880 1826-747912",
+tagline:"Investigate · Analyze · Design · Deliver",
+engineer:"", engtitle:"Geotechnical Engineer",
+lh:"no", lhtop:20, lhbot:14, method:"Manual drive (hand wash)",
+gwt:5, int:5, gup:119.4, glo:125, hbase:25, gw:62.4, hammer:"45", cb:"1.00", cs:"1.00",
+cur:0.0625, cc:0.153, cr:0.0255, e0:0.936, es:400, fsa:2.5, fsb:3, fsp:2.5, sall:25, pc:"",
+df:8, bl:1, Bs:"3,4,5,6,8,10", cusrc:"mean", sb:9, sl:9, sq:3.09, sp:"",
+pd:500, ptype:"bored", ks:2, fsmax:100, qbmax:4000, pload:250, pdlist:"18,20,24",
+shdesc:"Continuous wall/RCC Strip as well as Isolated type footing", cutlvl:5,
+usesand:false, spdia:8, spstart:5, spembed:15, spspacing:"1'-6\"", spcap:1.20,
+useprecast:false, pcsize:"8\" X 8\"", pcdepth:18, pcbh:""};
+
+const HG_LOGO="data:image/jpeg;base64,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";
+let S = { holes:[], active:0, lab:{idx:[],uc:[],ds:[],cons:[]}, logo:HG_LOGO };
+
+/* ---------------- sample = the real project ---------------- */
+const SAMPLE_N={"BH-01":[6,10,10,13,22,38,46,50,50,50,50,50],
+ "BH-02":[7,11,10,14,23,36,43,50,50,50,50,50],
+ "BH-03":[6,10,12,13,25,40,50,50,50,50,50,50],
+ "BH-04":[4,13,14,15,26,38,45,50,50,50,50,50]};
+const SAMPLE_STR={"BH-01":[[0,25],[25,40],[40,60]],"BH-02":[[0,25],[25,40],[40,60]],
+ "BH-03":[[0,25],[25,35],[35,60]],"BH-04":[[0,25],[25,40],[40,60]]};
+const DESCS=["Brown stiff SILT, little fine sand, little clay",
+ "Reddish brown dense fine to medium SAND, trace silt",
+ "Reddish brown very dense fine to medium SAND, trace silt"];
+const SDEPTHS=[5,10,15,20,25,30,35,40,45,50,55,60];
+
+const REAL_SDEPTHS=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100];
+const REAL_STR_BOUND=[[0,7],[7,23],[23,33],[33,57],[57,100]];
+const REAL_DESCS=["Reddish soft Clayey SILT with trace fine sand",
+ "Reddish very stiff High Plastic CLAY with trace fine sand and silt",
+ "Reddish stiff SILT with trace fine sand and clay",
+ "Brown medium dense to dense fine SAND with trace silt and mica",
+ "Brown very dense fine SAND with trace silt and mica"];
+const REAL_N={
+ "BH-01":[4,18,14,17,13,13,20,25,29,38,43,50,50,50,50,50,50,50,50,50],
+ "BH-02":[3,18,15,16,14,12,24,30,33,42,46,50,50,50,50,50,50,50,50,50],
+ "BH-03":[4,21,26,20,18,14,25,47,38,35,42,50,50,50,50,50,50,50,50,50],
+ "BH-04":[3,20,22,19,17,19,25,35,40,42,45,50,50,50,50,50,50,50,50,50],
+ "BH-05":[3,21,23,19,18,19,25,34,36,40,46,50,50,50,50,50,50,50,50,50],
+ "BH-06":[2,17,19,21,20,12,27,32,37,38,47,50,50,50,50,50,50,50,50,50],
+ "BH-07":[2,18,23,16,15,13,26,30,35,40,45,50,50,50,50,50,50,50,50,50],
+ "BH-08":[3,15,20,18,17,13,27,36,40,38,44,50,50,50,50,50,50,50,50,50],
+ "BH-09":[2,13,15,19,15,11,25,33,39,38,43,50,50,50,50,50,50,50,50,50],
+ "BH-10":[3,10,18,22,17,14,24,34,45,40,43,50,50,50,50,50,50,50,50,50],
+ "BH-11":[2,12,16,20,18,15,22,45,42,38,43,50,50,50,50,50,50,50,50,50]
+};
+const REAL_LAB={
+ idx:[
+  ["BH-01","D-1",5,29.75,"","",10.78,48.35,40.87,2.672,"Reddish soft Clayey SILT with trace fine sand"],
+  ["BH-01","D-7",35,"","","","","","","","Reddish stiff SILT with trace fine sand and clay"],
+  ["BH-02","D-8",40,15.06,"","",84.97,15.03,"",2.683,"Brown medium dense fine SAND with trace silt and mica"],
+  ["BH-03","D-7",35,15.68,"","",82.64,17.36,"",2.681,"Reddish stiff SILT with trace fine sand and clay"],
+  ["BH-04","D-9",45,13.15,"","",89.99,10.01,"",2.685,"Brown dense fine SAND with trace silt and mica"],
+  ["BH-05","D-10",50,13.5,"","",90,10,"",2.686,"Brown dense fine SAND with trace silt and mica"],
+  ["BH-06","D-11",55,12.84,"","",91.86,8.14,"",2.687,"Brown dense fine SAND with trace silt and mica"],
+  ["BH-07","D-12",60,11.95,"","",93.24,6.76,"",2.688,"Brown very dense fine SAND with trace silt and mica"],
+  ["BH-08","D-13",65,11.45,"","",94,6,"",2.688,"Brown very dense fine SAND with trace silt and mica"],
+  ["BH-09","D-20",100,10.18,"","",95.13,4.87,"",2.689,"Brown very dense fine SAND with trace silt and mica"],
+  ["BH-10","D-8",40,14.67,"","",86.95,13.05,"",2.684,"Brown medium dense fine SAND with trace silt and mica"],
+  ["BH-11","D-19",95,11.03,"","",94.27,5.73,"",2.688,"Brown very dense fine SAND with trace silt and mica"]
+ ].map(r=>({bh:r[0],sm:r[1],d:r[2],nmc:r[3],ll:r[4],pi:r[5],sand:r[6],silt:r[7],clay:r[8],gs:r[9],cls:r[10]})),
+ uc:[],
+ ds:[
+  ["BH-01","D-7",35,25,0.041],["BH-02","D-8",40,27,0.036],["BH-03","D-7",35,26,0.040],
+  ["BH-04","D-9",45,33,0.023],["BH-05","D-10",50,34,0.022],["BH-06","D-11",55,36,0.019],
+  ["BH-07","D-12",60,38,0.016],["BH-08","D-13",65,39,0.014],["BH-09","D-20",100,41,0.010],
+  ["BH-10","D-8",40,30,0.026],["BH-11","D-19",95,40,0.011]
+ ].map(r=>({bh:r[0],sm:r[1],d:r[2],phi:r[3],c:r[4]})),
+ cons:[]
+};
+const REAL_META={project:"Proposed G+12 (Thirteen) Storied Residential Building",
+ location:"Dag No C.S. & S.A. – 15, 23, R.S. - 65, B.R.S. – 5708, Khatian No C.S. – 57, S.A. – 59, R.S. – 43, B.R.S. – 1022, Namjari – 2025-100040, Juth No – 2025-100040, J.L. No C.S. – 663, S.A. – 178, R.S. – 170, B.R.S. – 153, Mouza – Choto Bolimehar, Savar Pourashava, P.S. – Savar, Dist. - Dhaka, Bangladesh.",
+ client:"Abdur Rouf Gong", struct:"G+12 (Thirteen) Storied Residential Building",
+ firm:"R/K SOIL ENGINEERING", engineer:"Engr. Mohammad Mohsin Jaman",
+ engtitle:"B.Sc Engineer Civil BUET, Fellow Member (IEB), F/03429 Soil & Foundation Engr.",
+ addr:"TA-39/1(2nd Floor), Gulshan Badda Link Road, Badda, Dhaka", mobile:"01920-749-630",
+ date:"November – 2025", gwt:4, int:5, df:12, fsa:3, fsb:3, fsp:3,
+ pdlist:"18,20,24", cutlvl:0, usesand:false, useprecast:false};
+
+function loadReal(){
+  S.holes = Object.keys(REAL_N).map(nm=>({name:nm, rows:REAL_SDEPTHS.map((d,i)=>{
+    let li=0; REAL_STR_BOUND.forEach((b,j)=>{ if(d>b[0]&&d<=b[1]) li=j; });
+    return {d, desc:REAL_DESCS[li], st: li<=2?"Cohesive":"Cohesionless", n:REAL_N[nm][i], g:""};
+  })}));
+  S.active=0; S.lab=JSON.parse(JSON.stringify(REAL_LAB)); if(!S.logo) S.logo=HG_LOGO;
+  FIELDS.forEach(k=>{ if($("f_"+k) && DEFAULTS[k]!==undefined){ if(CHK_FIELDS.includes(k)) $("f_"+k).checked=!!DEFAULTS[k]; else $("f_"+k).value=DEFAULTS[k]; } });
+  FIELDS.forEach(k=>{ if($("f_"+k) && REAL_META[k]!==undefined){ if(CHK_FIELDS.includes(k)) $("f_"+k).checked=!!REAL_META[k]; else $("f_"+k).value=REAL_META[k]; } });
+  refresh();
+}
+
+function loadSample(){
+  S.holes = Object.keys(SAMPLE_N).map(nm=>({name:nm, rows:SDEPTHS.map((d,i)=>{
+    let li=0; SAMPLE_STR[nm].forEach((b,j)=>{ if(d>b[0]&&d<=b[1]) li=j; });
+    return {d, desc:DESCS[li], st: li===0?"Cohesive":"Cohesionless", n:SAMPLE_N[nm][i], g:""};
+  })}));
+  S.active=0; S.lab=cloneLab(); if(!S.logo) S.logo=HG_LOGO;
+  FIELDS.forEach(k=>{ if($("f_"+k) && DEFAULTS[k]!==undefined){ if(CHK_FIELDS.includes(k)) $("f_"+k).checked=!!DEFAULTS[k]; else $("f_"+k).value=DEFAULTS[k]; } });
+  refresh();
+}
+
+/* ---------------- engine ---------------- */
+function guessGamma(d){ return d<=N("hbase") ? N("gup") : N("glo"); }
+function CRof(d){ return d<13.1?0.75 : d<20?0.85 : d<30?0.95 : 1.00; }
+
+function computeHole(h){
+  const gwt=N("gwt"), gw=N("gw")||62.4, Em=N("hammer")||60, CB=N("cb")||1, CS=N("cs")||1, cur=N("cur")||0.0625;
+  const out=[]; let svPrev=0, dPrev=0;
+  for(const r of h.rows){
+    const d=num(r.d); if(d===null) continue;
+    const g=num(r.g) ?? guessGamma(d);
+    const svp = svPrev + Math.max(0,dPrev-gwt)*gw + g*(d-dPrev) - Math.max(0,d-gwt)*gw;
+    svPrev=svp; dPrev=d;
+    const n=num(r.n);
+    const CR=CRof(d);
+    const N60 = n===null?null : n*(Em/60)*CB*CS*CR;
+    const CN = Math.min(1.7, Math.sqrt(2000/Math.max(svp,100)));
+    const N160 = N60===null?null : N60*CN;
+    const cls = N60===null?"" : (r.st==="Cohesive"
+      ? (N60<2?"Very soft":N60<4?"Soft":N60<8?"Medium stiff":N60<15?"Stiff":N60<30?"Very stiff":"Hard")
+      : (N60<4?"Very loose":N60<10?"Loose":N60<30?"Medium dense":N60<50?"Dense":"Very dense"));
+    const phi = (r.st==="Cohesionless"&&N60!==null) ? 27.1+0.30*N60-0.00054*N60*N60 : null;
+    const cuT = (r.st==="Cohesive"&&n!==null) ? cur*n : null;
+    out.push({...r, d, g, svp, CR, N60, CN, N160, cls, phi,
+      cuT, cuK: cuT===null?null:cuT*2, refusal: n!==null && n>=50});
+  }
+  return out;
+}
+const allComputed = () => S.holes.map(h=>({name:h.name, rows:computeHole(h)}));
+
+function depthUnion(){
+  const s=new Set(); S.holes.forEach(h=>h.rows.forEach(r=>{const d=num(r.d); if(d!==null) s.add(d);}));
+  return [...s].sort((a,b)=>a-b);
+}
+function nAt(hole,d){
+  const r=hole.rows.find(x=>x.d===d); return r? num(r.n) : null;
+}
+function meanNAt(d){
+  const v=S.holes.map(h=>nAt(h,d)).filter(x=>x!==null);
+  return v.length? v.reduce((a,b)=>a+b,0)/v.length : null;
+}
+/* undrained strength at an arbitrary depth, interpolated */
+function cuAt(depth, src){
+  if(src==="uc"){ const m=ucCuAt(depth); if(m!==null) return m; }
+  const ds=depthUnion(); if(!ds.length) return null;
+  const pick = d => {
+    if(src==="active"){ return nAt(S.holes[S.active],d); }
+    const v=S.holes.map(h=>nAt(h,d)).filter(x=>x!==null);
+    if(!v.length) return null;
+    return src==="min" ? Math.min(...v) : v.reduce((a,b)=>a+b,0)/v.length;
+  };
+  let lo=null,hi=null;
+  for(const d of ds){ if(d<=depth) lo=d; if(d>=depth && hi===null) hi=d; }
+  if(lo===null) lo=hi; if(hi===null) hi=lo;
+  const nlo=pick(lo), nhi=pick(hi);
+  if(nlo===null||nhi===null) return null;
+  const n = (hi===lo) ? nlo : nlo+(nhi-nlo)*(depth-lo)/(hi-lo);
+  return N("cur")*n*2;   // ksf
+}
+
+/* ---------------- borelog table ---------------- */
+function renderHoleTabs(){
+  const el=$("holeTabs");
+  el.innerHTML = S.holes.map((h,i)=>
+    `<button data-h="${i}" aria-pressed="${i===S.active}">${esc(h.name)}</button>`).join("")
+    + `<button id="btnAddHole" title="নতুন বোরহোল">+ বোরহোল</button>`
+    + (S.holes.length>1?`<button id="btnDelHole" style="color:var(--alert)">− বোরহোল</button>`:"");
+}
+function renderTable(){
+  renderHoleTabs();
+  const h=S.holes[S.active];
+  const tb=$("logBody"); tb.innerHTML="";
+  if(!h){ tb.innerHTML=`<tr><td colspan="15" style="padding:18px;color:#8FA2A8">বোরহোল যোগ করুন।</td></tr>`; return; }
+  const C=computeHole(h);
+  let ci=0;
+  h.rows.forEach((r,i)=>{
+    const ok = num(r.d)!==null ? C[ci++] : null;
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td class="num"><input type="number" step="0.5" value="${r.d??""}" data-i="${i}" data-f="d" style="width:60px"></td>
+      <td class="num calc">${ok?fmt(ok.d*FT_M,1):""}</td>
+      <td class="desc"><input value="${esc(r.desc??"")}" data-i="${i}" data-f="desc"></td>
+      <td><select data-i="${i}" data-f="st" style="width:116px">
+        <option ${r.st==="Cohesive"?"selected":""}>Cohesive</option>
+        <option ${r.st==="Cohesionless"?"selected":""}>Cohesionless</option></select></td>
+      <td class="num"><input type="number" step="1" value="${r.n??""}" data-i="${i}" data-f="n" style="width:54px"></td>
+      <td class="num"><input type="number" step="1" value="${r.g??""}" data-i="${i}" data-f="g" style="width:58px" placeholder="${ok?Math.round(ok.g):""}"></td>
+      <td class="num calc">${ok?fmt(ok.svp,0):""}</td>
+      <td class="num calc">${ok?fmt(ok.CR):""}</td>
+      <td class="num calc"><b>${ok?fmt(ok.N60,1):""}</b>${ok&&ok.refusal?' <span class="tag ref">R</span>':''}</td>
+      <td class="num calc">${ok?fmt(ok.CN):""}</td>
+      <td class="num calc"><b>${ok?fmt(ok.N160,1):""}</b></td>
+      <td class="calc">${ok?`<span class="tag ${ok.st==="Cohesive"?"clay":"sand"}">${ok.cls}</span>`:""}</td>
+      <td class="num calc">${ok&&ok.phi!==null?fmt(ok.phi,1):"—"}</td>
+      <td class="num calc">${ok&&ok.cuT!==null?fmt(ok.cuT,2):"—"}</td>
+      <td><button class="rowbtn" data-del="${i}">×</button></td>`;
+    tb.appendChild(tr);
+  });
+  renderStats(); renderWarn(); renderCompare(); renderStrata(); renderChart();
+}
+
+function renderStats(){
+  const A=allComputed(); const all=[].concat(...A.map(x=>x.rows));
+  const maxD = all.length? Math.max(...all.map(r=>r.d)) : 0;
+  const n60 = all.map(r=>r.N60).filter(v=>v!==null);
+  const ref = all.filter(r=>r.refusal).length;
+  $("stats").innerHTML=[
+    ["বোরহোল", S.holes.length],
+    ["মোট সারি", all.length],
+    ["সর্বোচ্চ গভীরতা", maxD?maxD+" ft":"—"],
+    ["N₆₀ পরিসর", n60.length?`${fmt(Math.min(...n60),0)}–${fmt(Math.max(...n60),0)}`:"—"],
+    ["Refusal রেকর্ড", all.length?`${ref} (${Math.round(ref/all.length*100)}%)`:"—"],
+    ["GWT", N("gwt")>=999?"none":N("gwt")+" ft"]
+  ].map(s=>`<div class="stat"><b>${s[1]}</b><span>${s[0]}</span></div>`).join("");
+}
+
+function renderWarn(){
+  const w=[]; const h=S.holes[S.active];
+  if(h){
+    const ds=h.rows.map(r=>num(r.d));
+    for(let i=1;i<ds.length;i++) if(ds[i]!==null&&ds[i-1]!==null&&ds[i]<=ds[i-1])
+      w.push(`সারি ${i+1}: গভীরতা আগেরটির চেয়ে বেশি হতে হবে।`);
+    h.rows.forEach((r,i)=>{
+      if(num(r.n)===null) w.push(`সারি ${i+1}: N-value নেই।`);
+      else if(num(r.n)>=50) w.push(`সারি ${i+1}: N = ${r.n} — এটি refusal রেকর্ড, পরিমাপ নয়। এর ওপর ভিত্তি করে pile ডিজাইন করবেন না।`);
+      if(!r.desc) w.push(`সারি ${i+1}: বর্ণনা খালি।`);
+    });
+  }
+  $("dataWarn").innerHTML = w.length
+    ? `<div class="warn"><b>খেয়াল করুন —</b><br>${[...new Set(w)].slice(0,5).join("<br>")}</div>`:"";
+  const g=$("gwtWarn");
+  if(N("gwt")===0){ g.style.display="block";
+    g.innerHTML="<b>GWT = 0 রাখা হয়েছে।</b> এটি অনেক লগ-শিটের ছাপানো ডিফল্ট, পরিমাপ নয়। প্রকৃত মান না বসালে σ′v, C<sub>N</sub> ও settlement — তিনটাই ভুল হবে। পানি না পেলে 999 লিখুন।"; }
+  else g.style.display="none";
+}
+
+function renderCompare(){
+  const A=allComputed(), ds=depthUnion();
+  if(!ds.length){ $("cmpTable").innerHTML=`<p class="hint">ডেটা নেই।</p>`; return; }
+  let h=`<div class="tblwrap"><table><thead><tr><th>Depth<small>ft</small></th>`;
+  A.forEach(x=>h+=`<th>${esc(x.name)}</th>`);
+  h+=`<th>Mean N₆₀</th></tr></thead><tbody>`;
+  ds.forEach(d=>{
+    h+=`<tr><td class="num">${d}</td>`;
+    const vals=[];
+    A.forEach(x=>{ const r=x.rows.find(y=>y.d===d);
+      if(r&&r.N60!==null){vals.push(r.N60); h+=`<td class="num">${fmt(r.N60,1)}${r.refusal?' <span class="tag ref">R</span>':''}</td>`;}
+      else h+=`<td class="cellna">—</td>`; });
+    h+=`<td class="num"><b>${vals.length?fmt(vals.reduce((a,b)=>a+b,0)/vals.length,1):"—"}</b></td></tr>`;
+  });
+  $("cmpTable").innerHTML=h+`</tbody></table></div>
+    <p class="hint" style="margin-top:8px"><b>R</b> = refusal record. Chapter 5 দেখুন — ৫০ কোনো পরিমাপ নয়।</p>`;
+}
+
+/* ---------------- strata column, all holes ---------------- */
+function renderStrata(){
+  const A=allComputed(), el=$("strataCol");
+  if(!A.length||!A[0].rows.length){ el.innerHTML=`<p style="font-size:12px;color:#8FA2A8;padding:8px 4px">ডেটা বসালে স্তরের ছবি আঁকা হবে।</p>`; return; }
+  const maxD=Math.max(...[].concat(...A.map(x=>x.rows)).map(r=>r.d));
+  const gwt=N("gwt");
+  const W=250,H=470,top=26,left=30,colW=Math.min(40,(W-left-10)/A.length-6),gap=6;
+  const y=d=>top+(d/maxD)*(H-top-14);
+  let g="";
+  A.forEach((hole,hi)=>{
+    const x=left+hi*(colW+gap);
+    g+=`<text x="${x+colW/2}" y="${top-8}" font-size="8.5" text-anchor="middle" fill="#415C68">${esc(hole.name.replace("BH-",""))}</text>`;
+    let prev=0;
+    hole.rows.forEach(r=>{
+      const pat = r.st==="Cohesive" ? "h_clay" : "h_sand";
+      g+=`<rect x="${x}" y="${y(prev)}" width="${colW}" height="${Math.max(y(r.d)-y(prev),1)}" fill="url(#${pat})" stroke="#16323F" stroke-width=".6"/>`;
+      prev=r.d;
+    });
+  });
+  const step = maxD>80?20:maxD>40?10:5;
+  for(let d=0;d<=maxD;d+=step)
+    g+=`<line x1="${left-5}" y1="${y(d)}" x2="${left}" y2="${y(d)}" stroke="#8FA2A8" stroke-width=".7"/>
+        <text x="${left-8}" y="${y(d)+3}" font-size="8.5" text-anchor="end" fill="#415C68" font-family="ui-monospace,monospace">${d}</text>`;
+  if(gwt>0&&gwt<maxD){
+    const yg=y(gwt), xEnd=left+A.length*(colW+gap)-gap;
+    g+=`<line x1="${left-8}" y1="${yg}" x2="${xEnd+3}" y2="${yg}" stroke="#2E7FA8" stroke-width="1.3"/>
+        <polygon points="${xEnd-8},${yg-7} ${xEnd},${yg-7} ${xEnd-4},${yg}" fill="#2E7FA8"/>`;
+  }
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H+4}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Strata columns">
+  <defs>
+    <pattern id="h_clay" width="8" height="6" patternUnits="userSpaceOnUse"><rect width="8" height="6" fill="#F0EDE6"/>
+      <line x1="0" y1="3" x2="5" y2="3" stroke="#7E7466" stroke-width=".6"/></pattern>
+    <pattern id="h_sand" width="7" height="7" patternUnits="userSpaceOnUse"><rect width="7" height="7" fill="#FAF2DE"/>
+      <circle cx="2" cy="2" r=".85" fill="#C08A2E"/><circle cx="5.5" cy="5" r=".85" fill="#C08A2E"/></pattern>
+  </defs>
+  <text x="4" y="12" font-size="8" fill="#415C68" letter-spacing="1.2">DEPTH (ft)</text>${g}</svg>`;
+}
+
+/* ---------------- chart ---------------- */
+function renderChart(){
+  const A=allComputed(), el=$("chart");
+  const pts=[].concat(...A.map(x=>x.rows)).filter(r=>r.N60!==null);
+  if(!pts.length){ el.innerHTML=`<p class="hint">ডেটা নেই।</p>`; return; }
+  const maxD=Math.max(...pts.map(r=>r.d));
+  const maxN=Math.max(20,Math.ceil(Math.max(...pts.map(r=>Math.max(r.N60,r.N160)))/10)*10);
+  const W=760,H=380,L=52,R=140,T=20,B=42;
+  const x=n=>L+(n/maxN)*(W-L-R), y=d=>T+(d/maxD)*(H-T-B);
+  let g="";
+  for(let n=0;n<=maxN;n+=(maxN/10>5?10:5))
+    g+=`<line x1="${x(n)}" y1="${T}" x2="${x(n)}" y2="${H-B}" stroke="#E3EAEB"/>
+        <text x="${x(n)}" y="${H-B+15}" font-size="10" text-anchor="middle" fill="#415C68" font-family="ui-monospace,monospace">${n}</text>`;
+  const step=maxD>80?20:maxD>40?10:5;
+  for(let d=0;d<=maxD;d+=step)
+    g+=`<line x1="${L}" y1="${y(d)}" x2="${W-R}" y2="${y(d)}" stroke="#E3EAEB"/>
+        <text x="${L-8}" y="${y(d)+3.5}" font-size="10" text-anchor="end" fill="#415C68" font-family="ui-monospace,monospace">${d}</text>`;
+  const cols=["#16323F","#2E7FA8","#C08A2E","#7A6A9A","#1E6B4F","#A63A18"];
+  A.forEach((hole,i)=>{
+    const p=hole.rows.filter(r=>r.N60!==null); if(!p.length) return;
+    const col=cols[i%cols.length];
+    g+=`<polyline points="${p.map(r=>`${x(r.N60)},${y(r.d)}`).join(" ")}" fill="none" stroke="${col}" stroke-width="1.6"/>`;
+    g+=p.map(r=>`<circle cx="${x(r.N60)}" cy="${y(r.d)}" r="2.8" fill="#fff" stroke="${col}" stroke-width="1.4"/>`).join("");
+    g+=`<line x1="${W-R+14}" y1="${T+12+i*15}" x2="${W-R+30}" y2="${T+12+i*15}" stroke="${col}" stroke-width="1.6"/>
+        <text x="${W-R+35}" y="${T+15+i*15}" font-size="10.5" fill="#16323F">${esc(hole.name)}</text>`;
+  });
+  const gwt=N("gwt");
+  if(gwt>0&&gwt<maxD) g+=`<line x1="${L}" y1="${y(gwt)}" x2="${W-R}" y2="${y(gwt)}" stroke="#2E7FA8" stroke-dasharray="5 3" stroke-width="1.1"/>
+    <text x="${W-R-4}" y="${y(gwt)-4}" font-size="9.5" text-anchor="end" fill="#2E7FA8">GWT</text>`;
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="N60 vs depth">
+    <rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="#FCFDFD" stroke="#C3CFD2"/>${g}
+    <text x="${(L+W-R)/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#16323F">N₆₀ (blows/ft)</text>
+    <text transform="translate(13,${(T+H-B)/2}) rotate(-90)" font-size="11" text-anchor="middle" fill="#16323F">Depth (ft)</text></svg>`;
+}
+
+/* ---------------- bearing ---------------- */
+function bearingRows(){
+  const Df=N("df"), BL=N("bl")||1, cu=cuAt(Df,V("cusrc"));
+  const Bs=V("Bs").split(",").map(s=>num(s)).filter(v=>v&&v>0);
+  return {Df,cu,BL,rows:Bs.map(B=>{
+    if(cu===null) return {B,q:null};
+    const q=5.14*cu*(1+0.2*BL)*Math.min(1.5,1+0.2*Df/B);
+    return {B,q,shape:1+0.2*BL,depth:Math.min(1.5,1+0.2*Df/B)};
+  })};
+}
+function renderBearing(){
+  const {Df,cu,rows}=bearingRows();
+  if(cu===null){ $("bearingOut").innerHTML=`<p class="hint">আগে বোরলগ ডেটা বসান।</p>`; return; }
+  const fa=N("fsa")||2.5, fb=N("fsb")||3;
+  let h=`<p class="hint">D<sub>f</sub> = ${Df} ft — c<sub>u</sub> = <b>${fmt(cu,2)} ksf</b> (${fmt(cu/2,2)} tsf, ${fmt(cu*KSF_KPA,0)} kPa), ${V("cusrc")==="min"?"সবচেয়ে দুর্বল বোরহোল":V("cusrc")==="active"?esc(S.holes[S.active].name):"সব বোরহোলের গড়"} থেকে।</p>
+  <div class="tblwrap"><table><thead><tr><th>B<small>ft</small></th><th>Shape</th><th>Depth</th>
+  <th>q<sub>net(ult)</sub><small>ksf</small></th><th>q<sub>a</sub> @ FS ${fa}<small>ksf</small></th>
+  <th>q<sub>a</sub> @ FS ${fa}<small>tsf</small></th><th>q<sub>a</sub> @ FS ${fb}<small>ksf</small></th>
+  <th>q<sub>a</sub> @ FS ${fb}<small>tsf</small></th></tr></thead><tbody>`;
+  rows.forEach(r=>{ h+=`<tr><td class="num"><b>${r.B}</b></td><td class="num">${fmt(r.shape)}</td>
+    <td class="num">${fmt(r.depth)}</td><td class="num">${fmt(r.q)}</td>
+    <td class="num">${fmt(r.q/fa)}</td><td class="num"><b>${fmt(r.q/fa/2)}</b></td>
+    <td class="num">${fmt(r.q/fb)}</td><td class="num"><b>${fmt(r.q/fb/2)}</b></td></tr>`; });
+  h+=`</tbody></table></div><div class="warn" style="margin-top:12px">FS ${fa} থেকে FS ${fb}-এ গেলে অনুমোদিত চাপ <b>${fmt((fb/fa-1)*100,0)}%</b> কমে যায়। রিপোর্টে একটাই FS লিখুন এবং সর্বত্র সেটাই ব্যবহার করুন।</div>
+  <div class="note">এই সাইটে সাধারণত shear governs করে না — <b>Settlement ট্যাব</b> না দেখে কোনো মান গ্রহণ করবেন না।</div>`;
+  $("bearingOut").innerHTML=h;
+}
+
+/* ---------------- settlement ---------------- */
+function settleCalc(B,L,q){
+  const Df=N("df"), hbase=N("hbase"), gwt=N("gwt"), gup=N("gup"), gw=N("gw")||62.4;
+  const H=Math.max(hbase-Df,0), z=H/2, dmid=Df+z;
+  const p0=Math.max(gup*dmid-Math.max(0,dmid-gwt)*gw,50);
+  const dp=q*B*L/((B+z)*(L+z))*1000;
+  const lt=Math.log10((p0+dp)/p0);
+  const e0=N("e0"), es=N("es")||400;
+  return {H,z,dmid,p0,dp,lt,
+    ScA:(N("cc")/(1+e0))*H*lt*MM_FT, ScB:(N("cr")/(1+e0))*H*lt*MM_FT,
+    Si:q*B*(1-0.25)*0.82/es*MM_FT};
+}
+const verdictOf = t => t<=N("sall") ? ["pass","PASSES"] : t<=65 ? ["marg","MARGINAL"] : ["fail","FAILS"];
+
+function renderSettle(){
+  const P=num(V("sp"));
+  let q=N("sq"), B=N("sb"), L=N("sl");
+  if(P && q>0){ B=Math.sqrt(P/q); L=B; $("f_sb").value=B.toFixed(1); $("f_sl").value=B.toFixed(1); }
+  if(!B||!L||!q){ $("settleOut").innerHTML=`<p class="hint">B, L এবং q দিন।</p>`; $("sensOut").innerHTML=""; return; }
+  const r=settleCalc(B,L,q);
+  const tA=r.Si+r.ScA, tB=r.Si+r.ScB;
+  const vA=verdictOf(tA), vB=verdictOf(tB);
+  $("settleOut").innerHTML=`
+  <div class="tblwrap"><table><thead><tr><th>Quantity</th><th>Value</th></tr></thead><tbody>
+    <tr><td style="text-align:left">Compressible স্তরের পুরুত্ব H</td><td class="num">${fmt(r.H,1)} ft</td></tr>
+    <tr><td style="text-align:left">Mid-layer গভীরতা</td><td class="num">${fmt(r.dmid,1)} ft</td></tr>
+    <tr><td style="text-align:left">প্রাথমিক effective stress p₀</td><td class="num">${fmt(r.p0,0)} psf</td></tr>
+    <tr><td style="text-align:left">Stress increase Δp (2:1)</td><td class="num">${fmt(r.dp,0)} psf</td></tr>
+    <tr><td style="text-align:left">(p₀+Δp)/p₀</td><td class="num">${fmt((r.p0+r.dp)/r.p0,3)}</td></tr>
+    <tr><td style="text-align:left">Immediate settlement S<sub>i</sub></td><td class="num">${fmt(r.Si,1)} mm</td></tr>
+  </tbody></table></div>
+  <div class="verdict">
+    <div class="vbox ${vB[0]}"><h4>Case B — over-consolidated (C<sub>r</sub>)</h4>
+      <div class="big">${fmt(tB,0)} mm</div>
+      <div class="sub">S<sub>c</sub> ${fmt(r.ScB,1)} + S<sub>i</sub> ${fmt(r.Si,1)} · ${fmt(tB/25.4,2)} in · <b>${vB[1]}</b></div></div>
+    <div class="vbox ${vA[0]}"><h4>Case A — normally consolidated (C<sub>c</sub>)</h4>
+      <div class="big">${fmt(tA,0)} mm</div>
+      <div class="sub">S<sub>c</sub> ${fmt(r.ScA,1)} + S<sub>i</sub> ${fmt(r.Si,1)} · ${fmt(tA/25.4,2)} in · <b>${vA[1]}</b></div></div>
+  </div>
+  <div class="warn">কোন Case খাটবে তা নির্ভর করে pre-consolidation pressure p<sub>c</sub>-র ওপর, যা e–log p কার্ভে Casagrande construction করে বের করতে হয়। যতক্ষণ সেটা করা না হয়, <b>Case A ধরে ডিজাইন করুন</b>। এখানে দুটোর পার্থক্য <b>${fmt(tA/Math.max(tB,0.01),1)}×</b>।</div>`;
+  let s=`<div class="tblwrap"><table class="matrix"><thead><tr><th>B = L<small>ft</small></th><th>Δp<small>psf</small></th>
+    <th>S<sub>i</sub><small>mm</small></th><th>Case B<small>mm</small></th><th>Case A<small>mm</small></th><th>রায় (Case A)</th></tr></thead><tbody>`;
+  [3,4,5,6,8,10,12,15,20].forEach(b=>{
+    const x=settleCalc(b,b,q), ta=x.Si+x.ScA, v=verdictOf(ta);
+    s+=`<tr><td>${b}</td><td>${fmt(x.dp,0)}</td><td>${fmt(x.Si,1)}</td>
+      <td>${fmt(x.Si+x.ScB,1)}</td><td>${fmt(ta,1)}</td><td>${v[1]}</td></tr>`;
+  });
+  $("sensOut").innerHTML=s+`</tbody></table></div>
+    <p class="hint" style="margin-top:8px">একই চাপে <b>প্রশস্ত footing বেশি বসে</b> — কারণ চাপ compressible স্তরের আরও গভীরে পৌঁছায়। তাই বড় করলেই নিরাপদ নয়।</p>`;
+}
+
+/* ---------------- pile ---------------- */
+const PILE_DIAS=[300,350,400,450,500,600,750,900];
+function pileCalc(Dmm){
+  const C=computeHole(S.holes[S.active]||{rows:[]});
+  const Dft=(Dmm||N("pd")||500)/1000/FT_M, bored=V("ptype")==="bored";
+  const Kt=bored?0.5:1, K=N("ks")||2, fsmax=N("fsmax")||100, qbmax=N("qbmax")||4000;
+  const Ap=Math.PI*Dft*Dft/4, per=Math.PI*Dft, FS=N("fsp")||2.5;
+  let Qs=0, prev=0; const out=[];
+  for(const r of C){
+    const dz=r.d-prev; prev=r.d;
+    const fs = (r.st==="Cohesive" ? 0.55*(r.cuK??0) : Math.min(K*(r.N60??0),fsmax)*KPA_KSF)*Kt;
+    Qs += fs*per*dz/2;
+    const qp = (r.st==="Cohesive" ? 9*(r.cuK??0)
+      : Math.min(40*(r.N60??0)*(r.d/Dft), 400*(r.N60??0), qbmax)*KPA_KSF)*Kt;
+    const Qp = qp*Ap/2;
+    out.push({d:r.d, st:r.st, refusal:r.refusal, fs, Qs, Qp, Qu:Qs+Qp, Qa:(Qs+Qp)/FS});
+  }
+  return {out,FS,Dft};
+}
+function renderPile(){
+  if(!S.holes.length){ $("pileOut").innerHTML=`<p class="hint">ডেটা নেই।</p>`; return; }
+  const {out,FS}=pileCalc(), load=N("pload");
+  if(!out.length){ $("pileOut").innerHTML=`<p class="hint">ডেটা নেই।</p>`; return; }
+  let h=`<p class="hint">${esc(S.holes[S.active].name)} — ${V("ptype")==="bored"?"bored / cast-in-situ (সব মান ৫০% ধরা হয়েছে)":"driven"}, ব্যাস ${N("pd")} mm, FS ${FS}।</p>
+  <div class="tblwrap"><table><thead><tr><th>Depth<small>ft</small></th><th>ধরন</th><th>f<sub>s</sub><small>ksf</small></th>
+  <th>Q<sub>s</sub><small>tons</small></th><th>Q<sub>p</sub><small>tons</small></th><th>Q<sub>ult</sub><small>tons</small></th>
+  <th>Q<sub>all</sub><small>tons</small></th><th>Q<sub>all</sub><small>kN</small></th><th>পাইল সংখ্যা</th></tr></thead><tbody>`;
+  out.forEach(r=>{ const np = (load&&r.Qa>0)?Math.ceil((load/2)/r.Qa):"—";
+    h+=`<tr><td class="num">${r.d}${r.refusal?' <span class="tag ref">R</span>':''}</td><td>${r.st}</td>
+      <td class="num">${fmt(r.fs,3)}</td><td class="num">${fmt(r.Qs,1)}</td><td class="num">${fmt(r.Qp,1)}</td>
+      <td class="num">${fmt(r.Qu,1)}</td><td class="num"><b>${fmt(r.Qa,1)}</b></td>
+      <td class="num">${fmt(r.Qa*8.896,0)}</td><td class="num">${np}</td></tr>`; });
+  const anyRef=out.some(r=>r.refusal);
+  $("pileOut").innerHTML=h+`</tbody></table></div>
+  ${anyRef?`<div class="warn" style="margin-top:12px"><b>R চিহ্নিত গভীরতাগুলো refusal রেকর্ড।</b> ওখানে N মাপা হয়নি — শুধু টেস্ট থেমেছে। এই গভীরতায় pile toe বসাতে হলে static cone penetration test বা pile load test দিয়ে নিশ্চিত করুন।</div>`:""}
+  <p class="hint">Meyerhof: বালিতে f<sub>s</sub> = K·N₆₀ (সর্বোচ্চ ${N("fsmax")} kPa), q<sub>p</sub> = 40·N₆₀·(L/D) ≤ 400·N₆₀, ব্যবহারিক সীমা ${N("qbmax")} kPa। কাদায় f<sub>s</sub> = 0.55·c<sub>u</sub>, q<sub>p</sub> = 9·c<sub>u</sub>।</p>`;
+}
+
+function pileByDiameter(){
+  return PILE_DIAS.map(Dmm=>{
+    const {out,FS}=pileCalc(Dmm);
+    return {Dmm, out, FS};
+  }).filter(x=>x.out.length);
+}
+function pileDiaSummary(byDia){
+  const load=N("pload");
+  return byDia.map(x=>{
+    const last=x.out[x.out.length-1];
+    const np=(load && last.Qa>0) ? Math.ceil(load/last.Qa) : null;
+    return {Dmm:x.Dmm, depth:last.d, Qs:last.Qs, Qp:last.Qp, Qu:last.Qu, Qa:last.Qa, FS:x.FS, np};
+  });
+}
+
+function pileRecTable(){
+  const list=(V("pdlist")||"18,20,24").split(",").map(s=>parseFloat(s.trim())).filter(v=>v>0);
+  if(!list.length) return {dias:[],rows:[],maxD:0};
+  const byDia=list.map(inch=>({inch, mm:inch*25.4, cm:inch*2.54, out:pileCalc(inch*25.4).out}));
+  const n=Math.min(...byDia.map(x=>x.out.length));
+  if(!n) return {dias:[],rows:[],maxD:0};
+  const nRows=Math.min(3,n), rows=[];
+  for(let i=n-nRows;i<n;i++){
+    rows.push({depth:byDia[0].out[i].d, vals:byDia.map(x=>x.out[i].Qa)});
+  }
+  return {dias:byDia.map(x=>({inch:x.inch,mm:x.mm,cm:x.cm})), rows, maxD:byDia[0].out[n-1].d};
+}
+const ftIn = d => `${d}'-0"`;
+const ftM = d => (d*0.3048).toFixed(2);
+const LAB_DEF={
+ idx:[
+  ["BH-01","D-2",10,31.6,43,21,13,71,16,2.675,"SILT, trace fine sand some clay"],
+  ["BH-01","D-4",20,30.2,42,20,15,70,15,"","SILT little fine sand little clay"],
+  ["BH-01","D-7",35,"","","",86,14,"","","Medium to fine SAND little silt"],
+  ["BH-01","D-12",60,"","","",90,10,"","","Medium to fine SAND little silt"],
+  ["BH-02","D-1",5,32.5,44,22,12,70,18,2.670,"SILT, trace fine sand some clay"],
+  ["BH-02","D-3",15,32.0,40,19,13,70,17,"","SILT little fine sand little clay"],
+  ["BH-02","D-6",30,"","","",85,15,"","","Medium to fine SAND little silt"],
+  ["BH-02","D-10",50,"","","",89,11,"","","Medium to fine SAND little silt"],
+  ["BH-03","D-2",10,33.5,40,20,13,70,17,2.672,"SILT, trace fine sand some clay"],
+  ["BH-03","D-4",20,31.5,45,23,14,71,15,"","SILT little fine sand little clay"],
+  ["BH-03","D-8",40,"","","",87,13,"","","Medium to fine SAND little silt"],
+  ["BH-03","D-12",60,"","","",90,10,"","","Medium to fine SAND little silt"],
+  ["BH-04","D-1",5,33.6,43,22,10,69,21,2.675,"SILT, trace fine sand some clay"],
+  ["BH-04","D-3",15,31.6,42,20,13,71,16,"","SILT little fine sand little clay"],
+  ["BH-04","D-9",45,"","","",87,13,"","","Medium to fine SAND little silt"],
+  ["BH-04","D-11",55,"","","",89,11,"","","Medium to fine SAND little silt"]
+ ].map(r=>({bh:r[0],sm:r[1],d:r[2],nmc:r[3],ll:r[4],pi:r[5],sand:r[6],silt:r[7],clay:r[8],gs:r[9],cls:r[10]})),
+ uc:[["BH-02","UD-1",12,20.50,8.52,117.5,88.34,33.3],["BH-04","UD-2",12,22.68,8.78,119.4,91.80,30.1]]
+   .map(r=>({bh:r[0],sm:r[1],d:r[2],qu:r[3],st:r[4],wet:r[5],dry:r[6],nmc:r[7]})),
+ ds:[["BH-01","D-12",60,36,0.60],["BH-04","D-11",55,35,0.62]]
+   .map(r=>({bh:r[0],sm:r[1],d:r[2],phi:r[3],c:r[4]})),
+ cons:[{bh:"BH-04",d:12,gs:2.670,dry:91.8,nmc:30.1,e0:0.936,cc:0.153,cr:"",pc:"",cv:""}]
+};
+const cloneLab = () => JSON.parse(JSON.stringify(LAB_DEF));
+const emptyLab = () => ({idx:[],uc:[],ds:[],cons:[]});
+
+const ucCu = u => { const q=num(u.qu); return q===null?null : q*0.144/2; };            // ksf
+const consistencyOf = cuK => cuK===null?"—" : cuK<0.5?"Very soft":cuK<1?"Soft":cuK<2?"Medium stiff":cuK<4?"Stiff":cuK<8?"Very stiff":"Hard";
+const aLine = r => { const ll=num(r.ll), pi=num(r.pi); if(ll===null||pi===null) return null;
+  const a=0.73*(ll-20); return {a, above:pi>a, grp: pi>a ? (ll<50?"CL":"CH") : (ll<50?"ML":"MH")}; };
+
+/* measured cu at a depth, from UC tests (nearest / interpolated) */
+function ucCuAt(depth){
+  const v=S.lab.uc.map(u=>({d:num(u.d),cu:ucCu(u)})).filter(x=>x.d!==null&&x.cu!==null).sort((a,b)=>a.d-b.d);
+  if(!v.length) return null;
+  if(depth<=v[0].d) return v[0].cu;
+  if(depth>=v[v.length-1].d) return v[v.length-1].cu;
+  for(let i=1;i<v.length;i++) if(depth<=v[i].d){
+    const p=v[i-1],q=v[i]; return p.cu+(q.cu-p.cu)*(depth-p.d)/(q.d-p.d); }
+  return v[0].cu;
+}
+/* consolidation parameters actually in force */
+function consParams(){
+  const c=S.lab.cons.find(x=>num(x.cc)!==null) || {};
+  const cc = num(c.cc) ?? N("cc");
+  let cr = num(c.cr); if(cr===null) cr = N("cr") || cc/6;
+  const e0 = num(c.e0) ?? N("e0");
+  const pc = num(c.pc) ?? (num(V("pc")) || null);
+  const cv = num(c.cv);
+  return {cc,cr,e0,pc,cv,measured:!!S.lab.cons.length};
+}
+/* range-of-variation summary */
+function labRanges(){
+  const L=S.lab, R=[];
+  const rng=(arr,f)=>{ const v=arr.map(f).map(num).filter(x=>x!==null); return v.length?{n:v.length,lo:Math.min(...v),hi:Math.max(...v)}:null; };
+  const push=(name,r,unit,dec)=>{ if(r) R.push([name,r.n, r.lo===r.hi?`${r.lo.toFixed(dec)} ${unit}`:`${r.lo.toFixed(dec)} to ${r.hi.toFixed(dec)} ${unit}`]); };
+  push("Natural moisture content", rng(L.idx,r=>r.nmc), "%",1);
+  push("Liquid limit", rng(L.idx,r=>r.ll), "%",0);
+  push("Plasticity index", rng(L.idx,r=>r.pi), "%",0);
+  push("Specific gravity", rng(L.idx,r=>r.gs), "",3);
+  const gsz=L.idx.filter(r=>num(r.sand)!==null).length; if(gsz) R.push(["Grain size analysis",gsz,"From curve"]);
+  push("Natural (wet) unit weight", rng(L.uc,r=>r.wet), "pcf",1);
+  push("Dry density", rng(L.uc,r=>r.dry), "pcf",2);
+  push("Unconfined compressive strength", rng(L.uc,r=>r.qu), "psi",2);
+  push("Angle of internal friction", rng(L.ds,r=>r.phi), "degrees",0);
+  push("Compression index", rng(L.cons,r=>r.cc), "",3);
+  return R;
+}
+/* completeness score */
+function completeness(){
+  const L=S.lab, cp=consParams(), items=[
+    ["Borehole logs", S.holes.length>0 && S.holes.every(h=>h.rows.length>0)],
+    ["Ground water level recorded", N("gwt")!==0],
+    ["Grain size analysis", L.idx.some(r=>num(r.sand)!==null)],
+    ["Atterberg limits", L.idx.some(r=>num(r.ll)!==null)],
+    ["Natural moisture content", L.idx.some(r=>num(r.nmc)!==null)],
+    ["Specific gravity", L.idx.some(r=>num(r.gs)!==null)],
+    ["Unconfined compression", L.uc.length>0],
+    ["Direct shear", L.ds.length>0],
+    ["Consolidation, C\u1d04 and e\u2080", cp.measured && num(L.cons[0].cc)!==null],
+    ["Pre-consolidation pressure p_c", cp.pc!==null],
+    ["Coefficient of consolidation c_v", cp.cv!==null],
+    ["Project and client details", !!V("client") && !!V("firm")]
+  ];
+  const done=items.filter(x=>x[1]).length;
+  return {items, done, total:items.length, pct:Math.round(done/items.length*100)};
+}
+
+/* ---------------- lab table rendering ---------------- */
+const LAB_COLS={
+  idx:[["bh","text",56],["sm","text",62],["d","number",56],["nmc","number",56],["ll","number",50],
+       ["pi","number",50],null,["sand","number",54],["silt","number",54],["clay","number",54],
+       ["gs","number",62],["cls","text",0]],
+  uc:[["bh","text",56],["sm","text",62],["d","number",56],["qu","number",62],["st","number",56],
+      ["wet","number",62],["dry","number",62],["nmc","number",56]],
+  ds:[["bh","text",56],["sm","text",62],["d","number",56],["phi","number",56],["c","number",56]],
+  cons:[["bh","text",56],["d","number",56],["gs","number",62],["dry","number",62],["nmc","number",56],
+        ["e0","number",62],["cc","number",62],["cr","number",62],["pc","number",70],["cv","number",70]]
+};
+function inp(kind,i,f,v,type,w){
+  return `<input type="${type}" ${type==="number"?'step="any"':''} value="${esc(v??"")}"
+    data-lab="${kind}" data-li="${i}" data-lf="${f}" style="width:${w?w+"px":"100%"}">`;
+}
+function renderLab(){
+  if(!S.lab) S.lab=emptyLab();
+  /* index */
+  let b=$("bIdx"); b.innerHTML=S.lab.idx.map((r,i)=>{
+    const al=aLine(r), pl=(num(r.ll)!==null&&num(r.pi)!==null)?(num(r.ll)-num(r.pi)):null;
+    return `<tr>
+      ${LAB_COLS.idx.map(c=>c===null
+        ? `<td class="num calc">${pl!==null?pl.toFixed(0):"—"}</td>`
+        : `<td class="${c[0]==="cls"?"desc":"num"}">${inp("idx",i,c[0],r[c[0]],c[1],c[2])}</td>`).join("")}
+      <td class="calc">${al?`<span class="tag ${al.above?"clay":"sand"}">${al.grp}</span>`:"—"}</td>
+      <td><button class="rowbtn" data-labdel="idx" data-li="${i}">×</button></td></tr>`;}).join("");
+  /* uc */
+  b=$("bUc"); b.innerHTML=S.lab.uc.map((r,i)=>{ const cu=ucCu(r), q=num(r.qu);
+    return `<tr>${LAB_COLS.uc.map(c=>`<td class="num">${inp("uc",i,c[0],r[c[0]],c[1],c[2])}</td>`).join("")}
+      <td class="num calc">${q!==null?(q*0.144).toFixed(2):"—"}</td>
+      <td class="num calc"><b>${cu!==null?cu.toFixed(2):"—"}</b></td>
+      <td class="num calc">${cu!==null?(cu*KSF_KPA).toFixed(0):"—"}</td>
+      <td class="calc"><span class="tag clay">${consistencyOf(cu)}</span></td>
+      <td><button class="rowbtn" data-labdel="uc" data-li="${i}">×</button></td></tr>`;}).join("");
+  /* ds */
+  b=$("bDs"); b.innerHTML=S.lab.ds.map((r,i)=>{ const c=num(r.c);
+    return `<tr>${LAB_COLS.ds.map(x=>`<td class="num">${inp("ds",i,x[0],r[x[0]],x[1],x[2])}</td>`).join("")}
+      <td class="num calc">${c!==null?(c*0.144).toFixed(3):"—"}</td>
+      <td class="calc"><b style="color:var(--alert)">0</b></td>
+      <td><button class="rowbtn" data-labdel="ds" data-li="${i}">×</button></td></tr>`;}).join("");
+  /* cons */
+  b=$("bCon"); b.innerHTML=S.lab.cons.map((r,i)=>
+    `<tr>${LAB_COLS.cons.map(c=>`<td class="num">${inp("cons",i,c[0],r[c[0]],c[1],c[2])}</td>`).join("")}
+     <td><button class="rowbtn" data-labdel="cons" data-li="${i}">×</button></td></tr>`).join("");
+  renderPcNote(); renderRanges(); renderLabBadge();
+}
+function renderPcNote(){
+  const cp=consParams();
+  const st=settleCalc(N("sb")||6,N("sl")||6,N("sq")||3.2);
+  const el=$("pcNote"); if(!el) return;
+  if(cp.pc===null){
+    el.innerHTML=`<div class="warn" style="margin-top:12px"><b>p<sub>c</sub> বসানো হয়নি।</b>
+      এটাই ঠিক করে C<sub>c</sub> নাকি C<sub>r</sub> খাটবে — অর্থাৎ settlement ${fmt(st.Si+st.ScB,0)} mm হবে নাকি ${fmt(st.Si+st.ScA,0)} mm।
+      e–log p কার্ভে Casagrande construction করে মানটা বসান; ডেটা ল্যাবের ফাইলেই আছে।</div>`;
+  } else {
+    const applied=st.p0+st.dp, gov = cp.pc>applied ? "C<sub>r</sub> (recompression)" : "C<sub>c</sub> (virgin compression)";
+    const tot = cp.pc>applied ? st.Si+st.ScB : st.Si+st.ScA;
+    el.innerHTML=`<div class="note" style="margin-top:12px"><b>p<sub>c</sub> = ${fmt(cp.pc,0)} psf</b> বনাম প্রয়োগকৃত p₀+Δp = ${fmt(applied,0)} psf →
+      <b>${gov} governs</b>, settlement <b>${fmt(tot,0)} mm</b> (${verdictOf(tot)[1]})। প্রশ্নটা মীমাংসিত।</div>`;
+  }
+}
+function renderRanges(){
+  const R=labRanges();
+  $("rangeOut").innerHTML = R.length
+    ? `<div class="tblwrap"><table><thead><tr><th style="text-align:left">Name of the soil test</th>
+       <th>No. of tests</th><th style="text-align:left">Range of variation</th></tr></thead><tbody>`
+      + R.map(r=>`<tr><td style="text-align:left">${esc(r[0])}</td><td class="num">${r[1]}</td>
+        <td style="text-align:left">${esc(r[2])}</td></tr>`).join("")
+      + `</tbody></table></div><p class="hint" style="margin-top:8px">এই টেবিলটাই রিপোর্টের §10.6-এ বসে।</p>`
+    : `<p class="hint">ল্যাব ডেটা বসালে এখানে সারসংক্ষেপ তৈরি হবে।</p>`;
+}
+function renderLabBadge(){
+  const c=completeness(), el=$("labBadge"); if(!el) return;
+  const cls = c.pct>=100?"pass":c.pct>=75?"marg":"fail";
+  const missing=c.items.filter(x=>!x[1]).map(x=>x[0]);
+  el.className="vbox "+cls;
+  el.innerHTML=`<h4>রিপোর্টের সম্পূর্ণতা</h4><div class="big">${c.pct}%</div>
+    <div class="sub">${c.done} / ${c.total} আইটেম সম্পন্ন${missing.length?" · বাকি: "+missing.map(esc).join(", "):" · সব ভরাট"}</div>`;
+}
+function addLabRow(kind){
+  const blanks={idx:{bh:S.holes[S.active]?S.holes[S.active].name:"BH-01",sm:"",d:"",nmc:"",ll:"",pi:"",sand:"",silt:"",clay:"",gs:"",cls:""},
+    uc:{bh:"",sm:"",d:"",qu:"",st:"",wet:"",dry:"",nmc:""},
+    ds:{bh:"",sm:"",d:"",phi:"",c:""},
+    cons:{bh:"",d:"",gs:"",dry:"",nmc:"",e0:"",cc:"",cr:"",pc:"",cv:""}};
+  S.lab[kind].push({...blanks[kind]}); refresh();
+}
+
+/* ---------------- report ---------------- */
+
+function pg(){ return '<div class="pagebreak"></div>'; }
+function lhOn(){ return V("lh")!=="no"; }
+function footerBlock(){
+  const logo = S.logo?`<img class="ft-logo" src="${S.logo}" alt="">`:"";
+  return `${logo}<div class="ft-text">
+    <div><span class="ft-lbl">CONSULTANT:</span> ${esc(V("firm"))}${V("tagline")?` <span class="ft-tag">— ${esc(V("tagline"))}</span>`:""}</div>
+    ${V("addr")?`<div><span class="ft-lbl">Address:</span> ${esc(V("addr"))}</div>`:""}
+    <div>${V("email")?`<span class="ft-lbl">Email:</span> ${esc(V("email"))}`:""}${V("email")&&V("mobile")?`&nbsp; | &nbsp;`:""}${V("mobile")?`<span class="ft-lbl">Mobile:</span> ${esc(V("mobile"))}`:""}</div>
+  </div>`;
+}
+
+
+function reportHTML(){
+  const A=allComputed(), ds=depthUnion();
+  const all=[].concat(...A.map(x=>x.rows));
+  if(!all.length) return `<p>ডেটা বসালে রিপোর্ট তৈরি হবে।</p>`;
+  const maxD=Math.max(...all.map(r=>r.d));
+  const gwt=N("gwt"), Df=N("df"), cur=N("cur");
+  const {cu,rows:brows}=bearingRows();
+  const sB=N("sb")||6, sL=N("sl")||6, sq=N("sq")||3.2;
+  const st=settleCalc(sB,sL,sq);
+  const tA=st.Si+st.ScA, tB=st.Si+st.ScB;
+  const fa=N("fsa"), fb=N("fsb");
+  const ph=s=>esc(V(s))||"—";
+  const T=(hd,bd)=>`<table style="width:100%;border-collapse:collapse"><thead><tr>${hd}</tr></thead><tbody>${bd}</tbody></table>`;
+  const KV=arr=>T(`<th style="width:38%">Item</th><th>Detail</th>`,
+    arr.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td style="text-align:left">${r[1]}</td></tr>`).join(""));
+  const refCount=all.filter(r=>r.refusal).length;
+  const L=S.lab, cp=consParams(), comp=completeness();
+  const ucCuDf=ucCuAt(Df);
+  const applied=st.p0+st.dp;
+  const pcKnown=cp.pc!==null, crGoverns=pcKnown&&cp.pc>applied;
+  const govTot = pcKnown ? (crGoverns?tB:tA) : null;
+  const settleTot = pcKnown ? govTot : tA;
+  const settleVerdict = verdictOf(settleTot);
+  const foundationRec = settleVerdict[1]==="PASSES" ? "shallow" : "piled";
+  const pileByDia = pileByDiameter();
+  const pileDia = pileDiaSummary(pileByDia);
+  const pileRec = pileRecTable();
+  const qAllow = brows.length?fmt(brows[Math.min(3,brows.length-1)].q/fb/2,2):"—";
+  const dsPhi=L.ds.map(r=>num(r.phi)).filter(x=>x!==null);
+  const R=(hd,arr)=>T(hd,arr.join(""));
+  const n60v=all.map(r=>r.N60).filter(v=>v!==null);
+  const hasSand=all.some(r=>r.st==="Cohesionless");
+  const gwtTxt = gwt>=999 ? "not encountered to the termination depth of the borings"
+    : gwt===0 ? "<b>not recorded</b>" : `${gwt} ft (${fmt(gwt*FT_M,1)} m) below existing ground level`;
+
+  /* ---- stratification ---- */
+  let strRows="";
+  A.forEach(hole=>{
+    let cur2=null;
+    hole.rows.forEach((r,i)=>{
+      const key=r.st+"|"+r.desc;
+      if(cur2===null) cur2={key,desc:r.desc,from:0,to:r.d,ns:[r.N60]};
+      else if(cur2.key===key){cur2.to=r.d;cur2.ns.push(r.N60);}
+      else{ strRows+=`<tr><td>${esc(hole.name)}</td><td>${cur2.from} – ${cur2.to}</td><td>${fmt((cur2.to-cur2.from)*FT_M,1)}</td><td style="text-align:left">${esc(cur2.desc)}</td><td>${fmt(Math.min(...cur2.ns),0)} – ${fmt(Math.max(...cur2.ns),0)}</td></tr>`;
+        cur2={key,desc:r.desc,from:hole.rows[i-1].d,to:r.d,ns:[r.N60]}; }
+      if(i===hole.rows.length-1) strRows+=`<tr><td>${esc(hole.name)}</td><td>${cur2.from} – ${cur2.to}</td><td>${fmt((cur2.to-cur2.from)*FT_M,1)}</td><td style="text-align:left">${esc(cur2.desc)}</td><td>${fmt(Math.min(...cur2.ns),0)} – ${fmt(Math.max(...cur2.ns),0)}</td></tr>`;
+    });
+  });
+
+  /* ---- field N and N60 tables ---- */
+  let fieldRows="", n60rows="";
+  ds.forEach(d=>{
+    const fv=[], cv=[];
+    let a=`<tr><td>${d}</td><td>${fmt(d*FT_M,2)}</td>`, b=`<tr><td>${d}</td><td>${fmt(d*FT_M,2)}</td>`;
+    A.forEach(x=>{ const r=x.rows.find(y=>y.d===d);
+      a+=`<td>${r&&r.n!==null?r.n:"—"}${r&&r.refusal?"*":""}</td>`;
+      b+=`<td>${r?fmt(r.N60,1):"—"}</td>`;
+      if(r&&r.n!==null) fv.push(num(r.n)); if(r&&r.N60!==null) cv.push(r.N60); });
+    fieldRows+=a+`<td><b>${fv.length?fmt(fv.reduce((s,v)=>s+v,0)/fv.length,1):"—"}</b></td></tr>`;
+    n60rows+=b+`<td><b>${cv.length?fmt(cv.reduce((s,v)=>s+v,0)/cv.length,1):"—"}</b></td></tr>`;
+  });
+
+  /* ---- per-borehole bearing capacity, Table 5 style ---- */
+  const bcDepths=ds.filter(d=>d<=20);
+  let bcRows="";
+  A.forEach(hole=>{
+    bcDepths.forEach(d=>{
+      const r=hole.rows.find(y=>y.d===d); if(!r||r.n===null) return;
+      const cuT=cur*num(r.n), cuK=cuT*2;
+      const sq6=5.14*cuK*1.2*Math.min(1.5,1+0.2*d/6);
+      const raft=5.14*cuK*1.0*Math.min(1.5,1+0.2*d/40);
+      bcRows+=`<tr><td>${esc(hole.name)}</td><td>${d}</td><td>${r.n}</td><td>${fmt(cuT,2)}</td>
+        <td>${fmt(raft/fb/2,2)}</td><td>${fmt(sq6/fb/2,2)}</td></tr>`;
+    });
+  });
+
+  /* ---- per-borehole pile capacity, Table 7 style ---- */
+  const saveActive=S.active;
+  let pileSec="";
+  A.forEach((hole,hi)=>{
+    S.active=hi; const {out,FS}=pileCalc();
+    pileSec+=`<h3>12.4.${hi+1} ${esc(hole.name)}</h3>`+
+      T(`<th>Depth (ft)</th><th>f<sub>s</sub> (ksf)</th><th>Q<sub>s</sub> (tons)</th><th>Q<sub>p</sub> (tons)</th><th>Q<sub>ult</sub> (tons)</th><th>Q<sub>all</sub> (tons)</th><th>Q<sub>all</sub> (kN)</th>`,
+      out.map(r=>`<tr><td>${r.d}${r.refusal?"*":""}</td><td>${fmt(r.fs,3)}</td><td>${fmt(r.Qs,1)}</td>
+        <td>${fmt(r.Qp,1)}</td><td>${fmt(r.Qu,1)}</td><td><b>${fmt(r.Qa,1)}</b></td><td>${fmt(r.Qa*8.896,0)}</td></tr>`).join(""));
+  });
+  S.active=saveActive;
+
+  /* ---- attachment B: bore log sheets ---- */
+  let logSheets="";
+  A.forEach((hole,hi)=>{
+    logSheets+=pg()+`<h2>Attachment B${hi+1} — Bore Log, ${esc(hole.name)}</h2>`+
+      KV([["Project",ph("project")],["Location",ph("location")],["Borehole",esc(hole.name)],
+          ["Type of drilling",ph("method")],["Total depth",`${Math.max(...hole.rows.map(r=>r.d))} ft`],
+          ["Sampling interval",`${N("int")} ft`],["Ground water level",gwtTxt]])+
+      T(`<th>Depth (ft)</th><th>Depth (m)</th><th>Description of soil strata</th><th>N field</th><th>N₆₀</th><th>N₁₍₆₀₎</th><th>Consistency / density</th><th>φ (°)</th><th>c<sub>u</sub> (tsf)</th><th>Sample</th>`,
+      hole.rows.map((r,i)=>`<tr><td>${r.d}</td><td>${fmt(r.d*FT_M,2)}</td>
+        <td style="text-align:left">${esc(r.desc)}</td><td>${r.n!==null?r.n:"—"}${r.refusal?"*":""}</td>
+        <td>${fmt(r.N60,1)}</td><td>${fmt(r.N160,1)}</td><td>${esc(r.cls)}</td>
+        <td>${r.phi!==null?fmt(r.phi,1):"—"}</td><td>${r.cuT!==null?fmt(r.cuT,2):"—"}</td>
+        <td>D-${i+1}</td></tr>`).join(""))+
+      `<p class="cap">Bore log ${esc(hole.name)} — * denotes a refusal record</p>`;
+  });
+
+  /* ================= DOCUMENT ================= */
+  return `
+<table class="pagewrap"><tfoot><tr><td>
+${lhOn()?'<div class="lh-space"></div>':`<div class="runfoot">${footerBlock()}</div>`}
+</td></tr></tfoot><tbody><tr><td>
+${lhOn()?'<div class="lh-space"></div>':""}
+<div class="titlepage">
+ <div class="tp-top">
+  <p style="font-size:13px;letter-spacing:.1em">CLIENT</p>
+  <p style="font-size:17px;font-weight:bold;margin-top:0">${ph("client")}</p>
+  <div style="height:48px"></div>
+  <p style="font-size:13px;letter-spacing:.1em">REPORT ON</p>
+  <h1 style="font-size:20px;line-height:1.4;margin:8px 40px">SUB-SOIL INVESTIGATION FOR THE CONSTRUCTION OF ${ph("struct").toUpperCase()} AT ${ph("location").toUpperCase()}</h1>
+  <div style="height:40px"></div>
+  <p style="font-size:15px;font-weight:bold">${ph("date")}</p>
+ </div>
+ <div class="tp-bottom">
+  <p style="font-size:13px;letter-spacing:.1em;margin-bottom:0">SUB-SOIL INVESTIGATION &amp; REPORTED BY</p>
+  <div class="reportedby">
+    ${S.logo?`<img src="${S.logo}" alt="">`:""}
+    <div class="rb-name">${esc(V("firm"))}</div>
+    ${V("tagline")?`<div class="rb-tag">${esc(V("tagline"))}</div>`:""}
+    <div class="rb-addr">${esc(V("addr"))}</div>
+    <div class="rb-addr">${V("email")?"Email: "+esc(V("email")):""}${V("email")&&V("mobile")?" &nbsp;|&nbsp; ":""}${V("mobile")?"Mobile: "+esc(V("mobile")):""}</div>
+  </div>
+  <p style="font-size:12px;margin-top:14px">Report No. ${ph("repno")}</p>
+ </div>
+</div>
+${pg()}
+
+<h2>Contents</h2>
+${T(`<th style="width:10%">Sl.</th><th>Section</th>`,[
+"Introduction","Methodology","Client","Location","Scope of work","Field works",
+"Laboratory tests","Geological set-up and soil composition",
+"Correlation tables of soils based on SPT values","Physical properties",
+"Engineering properties","Evaluation of bearing capacity","Formulae used for computation",
+"Computation for consolidation settlement","Seismic design parameters","Conclusions",
+"Recommendations","Limitations","Field and laboratory record checklist"
+].map((s,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${s}</td></tr>`).join(""))}
+<h3>Attachments</h3>
+<ul><li>A — Site plan showing borehole locations</li>
+<li>B — Bore logs, ${A.length} sheet${A.length>1?"s":""}</li>
+<li>C — Grain size analysis</li><li>D — Unconfined compression tests</li>
+<li>E — Consolidation tests</li><li>F — Direct shear tests</li>
+<li>G — Summary of test results</li></ul>
+${pg()}
+
+<h2>1. Introduction</h2>
+<p>A reasonably accurate conception of the sub-soil parameters of a project site is an essential prerequisite for the proper planning and design of the foundation of the structure concerned, so that after construction the structure remains safe and stable throughout its service life.</p>
+<p>Accordingly, ${ph("client")} commissioned the sub-surface investigation for the construction of the proposed ${ph("struct")} at ${ph("location")}. The work was carried out by ${ph("firm")}.</p>
+<p>In accordance with the work order, a detailed sub-soil study comprising ${A.length} number of boring${A.length>1?"s":""} up to ${maxD} ft deep, including the field and laboratory tests described in this report, has been undertaken and completed.</p>
+
+<h2>2. Methodology</h2>
+<p>An SPT test team was mobilised to the site. The team leader agreed the borehole locations with the representative of the client before commencement. On completion of the field work the signature of the client's representative was obtained on the bore log sheets.</p>
+
+<h2>3. Client</h2><p>${ph("client")}</p>
+<h2>4. Location</h2><p>${ph("location")}</p>
+
+<h2>5. Scope of work</h2>
+<p>The main scope of this investigation comprised:</p>
+<ul>
+<li>Execution of exploratory borings, recording of sub-soil stratification and the position of the ground water table.</li>
+<li>Execution of the standard penetration test at intervals of ${N("int")} ft depth with collection of disturbed soil samples to the final depth of exploration of each boring.</li>
+<li>Collection of undisturbed soil samples by thin-walled Shelby tubes from the cohesive strata of each borehole.</li>
+<li>Laboratory testing of the recovered samples in accordance with the relevant ASTM procedures.</li>
+<li>Computation of bearing capacity values for the design of a shallow foundation.</li>
+<li>Computation of skin friction and end bearing values for the design of a deep foundation.</li>
+<li>Computation of settlement of the proposed foundation and comparison against permissible limits.</li>
+<li>Preparation of the final report with a detailed description of the sub-soil stratification.</li>
+</ul>
+${pg()}
+
+<h2>6. Field works</h2>
+<p>All field works and field tests were conducted in accordance with the standard procedures laid down in the relevant ASTM specifications.</p>
+
+<h3>6.1 Exploratory boring</h3>
+<p>Drilling was executed by ${ph("method").toLowerCase()}. A hole was started by driving a steel casing vertically into the ground to seat through the loose surface material. The formation below was then broken up by repeated drops of a chopping bit attached to the lower end of the drill pipe. Water was forced down the drill pipe under pressure; the slurry emerged at high velocity through the ports of the chopping bit and returned to the surface through the annular space between the drill pipe and the casing, carrying with it the broken-up soil. Drilling was advanced in this manner to a level 6 in. above the depth at which each standard penetration test was to be executed.</p>
+<p>The water level inside the casing was maintained at or above the level outside throughout, in order to prevent upward seepage and the consequent loosening of the soil at the base of the borehole.</p>
+
+<h3>6.2 Standard penetration test</h3>
+<p>Standard penetration tests were executed in all boreholes at ${N("int")} ft intervals of depth to the final depth of boring. A split-spoon sampler of 2 in. outside diameter and 1⅜ in. inside diameter was driven 18 in. into the soil by a hammer weighing 140 lb falling freely through a height of 30 in. The number of blows required for each 6 in. increment of penetration was recorded separately. The number of blows for the last 12 in. of the total 18 in. penetration is reported as the standard penetration value, N, in accordance with ASTM D1586.</p>
+<p>Where 50 blows were applied within any one 6 in. increment, or 100 blows in total, or where no advance was observed over 10 successive blows, the test was terminated and refusal recorded.</p>
+
+<h3>6.3 Extraction of soil samples</h3>
+<p>Disturbed soil samples were collected at ${N("int")} ft intervals and at every change of soil stratum by the split-spoon sampler. These samples were examined visually and classified to prepare the strata chart of soils to the explored depth. Before the collection of samples the hole was washed and cleaned with the drill pipe by means of an adapter lowered into the hole.</p>
+<p>Undisturbed soil samples were collected by means of thin-walled, sharp-ended 3 in. diameter Shelby tubes from the cohesive soil formation, at depths where the layer of soil changes. The sampler was pressed down into the ground in one rapid continuous movement. The collected tubes were labelled with the job designation, borehole number, depth and date, sealed at both ends, and shifted to the laboratory for testing.</p>
+
+<h3>6.4 Ground water observation</h3>
+<p>The position of the ground water table was ${gwtTxt}.${gwt===0?" <b>This is a deficiency in the field record. The position of the ground water table governs the effective stress profile, the overburden correction applied to the penetration resistance, and the computed settlement, and it cannot be recovered after the rig has left the site.</b>":" Seasonal fluctuation of the order of 3 to 5 ft should be anticipated, and for the checking of uplift, buoyancy and effective stress conditions the design water level should be taken at or close to the ground surface during the monsoon period."}</p>
+${pg()}
+
+<h2>7. Laboratory tests</h2>
+<p>All laboratory tests were conducted on soil samples collected either in the disturbed or in the undisturbed state. All tests were performed in accordance with the relevant ASTM procedures, as follows.</p>
+
+<h3>7.1 Natural moisture content</h3>
+<p>The water content of a soil sample is the ratio of the weight of water in the sample to the weight of its solids, expressed as a percentage. The sample is weighed in its natural state, oven dried at 105 to 110 °C for 24 hours, and reweighed. The moisture content is calculated from the loss of weight divided by the dry weight of the sample.</p>
+
+<h3>7.2 Complete grain size analysis</h3>
+<p>The object of grain size analysis is to determine the sizes of the soil grains and the percentage by weight of soil particles of different sizes comprising a soil sample. The process consists of sieve analysis, hydrometer analysis, or both. Hydrometer analysis is adopted for the fraction passing the No. 200 sieve.</p>
+<p>For hydrometer analysis, 40 g of the oven-dry sample is thoroughly mixed with the required quantity of water in a calibrated glass cylinder. A dispersing agent is added to avoid flocculation. The density of the suspension is measured at specified time intervals by means of a hydrometer of special design. At any particular time the size of the largest particle remaining in suspension at the level of the hydrometer can be computed by means of Stokes' Law, while the weight of the particles finer than that size can be computed from the density of the suspension at the same level.</p>
+<p>For sieve analysis, the mixture is washed through a U.S. standard sieve No. 200 and the fraction retained is dried. The fraction retained on each sieve of the nest is weighed for the calculation of the percentage of each fraction. The results are presented as cumulative curves plotted on semi-logarithmic graph paper.</p>
+
+<h3>7.3 Atterberg limits</h3>
+<p>The physical properties of clay are greatly influenced by water content. A given soil behaves as a fluid, as a solid, or as a plastic material depending on how much water it contains. The water contents corresponding to the boundaries between these states of consistency are called the Atterberg limits.</p>
+<p>The liquid limit is the minimum water content at which a clay soil just starts behaving like a fluid. It is determined with the help of a standard limit device consisting of a brass cup and an arrangement to impart blows to the cup at a uniform rate. The water content at which 25 blows are required to close a standard groove over a length of 13 mm is termed the liquid limit.</p>
+<p>The plastic limit is the minimum water content at which a soil is just plastic. It is determined by rolling a soil sample into a thread on a glass plate at a slowly decreasing water content until a thread of 3 mm (⅛ in.) diameter just begins to crumble.</p>
+<p>The plasticity index is the difference between the liquid limit and the plastic limit, and represents the range of water content over which the soil behaves plastically. Classification follows the A-line of the Casagrande plasticity chart, PI = 0.73 (LL − 20); a soil plotting above the line is classified as a clay and one plotting below it as a silt.</p>
+
+${L.idx.some(r=>num(r.nmc)!==null||num(r.ll)!==null)?`
+<h4>Results — index properties</h4>
+${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>NMC (%)</th><th>LL (%)</th><th>PI (%)</th><th>PL (%)</th><th>Sand (%)</th><th>Silt (%)</th><th>Clay (%)</th><th>G<sub>s</sub></th><th>Classification</th><th>Group</th>`,
+L.idx.map(r=>{const al=aLine(r),pl=(num(r.ll)!==null&&num(r.pi)!==null)?num(r.ll)-num(r.pi):null;
+ return `<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td><td>${esc(r.nmc)||"—"}</td>
+ <td>${esc(r.ll)||"—"}</td><td>${esc(r.pi)||"—"}</td><td>${pl!==null?pl:"—"}</td>
+ <td>${esc(r.sand)||"—"}</td><td>${esc(r.silt)||"—"}</td><td>${esc(r.clay)||"—"}</td>
+ <td>${esc(r.gs)||"—"}</td><td style="text-align:left">${esc(r.cls)}</td><td>${al?al.grp:"—"}</td></tr>`;}))}
+<p class="cap">Results of moisture content, Atterberg limits, grain size analysis and specific gravity</p>`:""}
+
+<h3>7.4 Specific gravity</h3>
+<p>The specific gravity of a solid is defined as the ratio of the unit weight of the solid to the unit weight of water. To determine the specific gravity of a soil sample, 25 g of oven-dried soil is thoroughly pulverised and placed in a calibrated pycnometer. Water is poured into the pycnometer until its level is slightly below the calibrated mark. The mixture is then boiled thoroughly in order to eliminate all entrapped air. More water is added until the flask is full, the mixture is left overnight to reach temperature equilibrium, and the flask is weighed.</p>
+<p style="text-align:center"><b>G<sub>s</sub> = (G<sub>t</sub> × W<sub>s</sub>) / (W<sub>s</sub> − W₁ + W₂)</b></p>
+<p>where G<sub>t</sub> is the specific gravity of water at the test temperature, W<sub>s</sub> is the weight of oven-dry soil, W₁ is the weight of flask plus soil plus water, and W₂ is the weight of flask plus water.</p>
+
+<h3>7.5 Direct shear test</h3>
+<p>The direct shear test can be performed on both cohesionless and cohesive soils to determine the shear strength, the angle of internal friction, the cohesion and the volume change. The test is carried out in a direct shear machine consisting of a normal loading device, a shearing device and a two-piece square shear box. A specimen approximately 5 cm by 5 cm and 1.2 cm thick is placed in the box. The rate of shearing displacement is approximately 1 mm per minute.</p>
+<p>The results of a direct shear test may be presented in a summary table and by stress–strain curves. The normal load usually varies from one third of 1 kg/cm² to 1 kg/cm². A further plot of normal stress against shearing stress gives the angle of internal friction and the cohesion intercept.</p>
+<p>Note that in a clean cohesionless soil the true cohesion is zero; a small intercept obtained from a best-fit line through three test points is experimental scatter and should be taken as zero in design.</p>
+
+${L.ds.length?`<h4>Results — direct shear</h4>
+${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>&phi; (degrees)</th><th>c (psi)</th><th>c (ksf)</th><th>c adopted in design</th>`,
+L.ds.map(r=>`<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td><td>${esc(r.phi)}&deg;</td>
+ <td>${esc(r.c)}</td><td>${num(r.c)!==null?fmt(num(r.c)*0.144,3):"—"}</td><td><b>0</b></td></tr>`))}
+<p class="cap">Results of direct shear tests</p>`:""}
+
+<h3>7.6 Triaxial shear test</h3>
+<p>In the triaxial test a cylindrical specimen, of height approximately twice its diameter, is enclosed in a rubber membrane within a pressure cell. A confining pressure is applied all round the specimen and the axial load is then increased until failure occurs. Three specimens are tested at different cell pressures and Mohr circles are drawn; the common tangent to the circles is the failure envelope, from which the cohesion and the angle of internal friction are read.</p>
+<p>The test may be run unconsolidated undrained, consolidated undrained with pore pressure measurement, or consolidated drained, according to whether short-term or long-term parameters are required.</p>
+
+${pg()}
+<h3>7.7 Unconfined compression test</h3>
+<p>The unconfined compression test is a simple method for the determination of the shearing strength of cohesive soil, which is important in determining the bearing capacity of soil. As the name implies, the lateral confining pressure in an unconfined compression test is kept at zero. The specimen is prepared from the undisturbed soil sample by carefully trimming it to a cylindrical shape of 7 cm height and 3.5 cm diameter. The specimen is placed on the level pedestal of the unconfined compression apparatus in a vertical position. The load is applied axially and is distributed uniformly over the surface of the specimen by means of a proving ring assembly fitted with a strain gauge.</p>
+<p>The load is applied at such a rate that the vertical deformation of the sample is nearly 2 per cent per minute, in order to avoid drainage during compression. The load is increased until the specimen fails along a shearing plane. The maximum load at failure is known as the unconfined compressive strength of the sample. The shearing strength of the sample is half of the unconfined compressive strength.</p>
+
+${L.uc.length?`<h4>Results — unconfined compression</h4>
+${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>q<sub>u</sub> (psi)</th><th>q<sub>u</sub> (ksf)</th><th>c<sub>u</sub> (ksf)</th><th>c<sub>u</sub> (kPa)</th><th>Strain at failure (%)</th><th>Wet density (pcf)</th><th>Dry density (pcf)</th><th>NMC (%)</th><th>Consistency</th>`,
+L.uc.map(r=>{const cu=ucCu(r);return `<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td>
+ <td>${esc(r.qu)}</td><td>${num(r.qu)!==null?fmt(num(r.qu)*0.144,2):"—"}</td>
+ <td><b>${cu!==null?fmt(cu,2):"—"}</b></td><td>${cu!==null?fmt(cu*KSF_KPA,0):"—"}</td>
+ <td>${esc(r.st)||"—"}</td><td>${esc(r.wet)||"—"}</td><td>${esc(r.dry)||"—"}</td>
+ <td>${esc(r.nmc)||"—"}</td><td>${consistencyOf(cu)}</td></tr>`;}))}
+<p class="cap">Results of unconfined compression tests. c<sub>u</sub> = q<sub>u</sub> / 2</p>`:""}
+
+<h3>7.8 Consolidation test</h3>
+<p>The gradual process of compression of soil under the action of a static load, accompanied by a decrease in void ratio due to the expulsion of water from the soil pores, is termed consolidation. The compressibility characteristics of a soil govern the period and magnitude of settlement of a foundation.</p>
+<p>The test is performed on a specimen of circular shape, 6.35 cm diameter and 2.54 cm thickness, prepared from an undisturbed sample by carefully trimming it to the required dimensions with the help of a cutting edge and wire saw. The specimen is placed in the consolidation ring with porous stones above and below. The load is applied by means of a lever arrangement. Decreases in volume of the specimen are read from a strain gauge attached to the consolidation unit at specified time intervals. The consolidation unit is kept full of water in order to avoid evaporation from the specimen.</p>
+<p>Each load increment is allowed to act for twenty-four hours. The observed readings are plotted on semi-logarithmic graph paper to give the pressure–void ratio curve, from which the compression index C<sub>c</sub> can be calculated. C<sub>c</sub> is the important factor governing the settlement process of the underlying soils.</p>
+<p>The pre-consolidation pressure p<sub>c</sub> should be determined from the same curve by Casagrande's construction: the point of minimum radius of curvature is located, a horizontal line and a tangent are drawn through it, the angle between them is bisected, and the intersection of the bisector with the extended virgin compression line gives p<sub>c</sub>. Where the applied stress remains below p<sub>c</sub>, the soil recompresses along the recompression index C<sub>r</sub>, which is typically one fifth to one tenth of C<sub>c</sub>, and settlement is correspondingly smaller.</p>
+
+${L.cons.length?`<h4>Results — consolidation</h4>
+${R(`<th>BH</th><th>Depth (ft)</th><th>G<sub>s</sub></th><th>Dry density (pcf)</th><th>NMC (%)</th><th>e&#8320;</th><th>C<sub>c</sub></th><th>C<sub>r</sub></th><th>p<sub>c</sub> (psf)</th><th>c<sub>v</sub> (ft&sup2;/day)</th>`,
+L.cons.map(r=>`<tr><td>${esc(r.bh)}</td><td>${esc(r.d)}</td><td>${esc(r.gs)||"—"}</td><td>${esc(r.dry)||"—"}</td>
+ <td>${esc(r.nmc)||"—"}</td><td>${esc(r.e0)||"—"}</td><td>${esc(r.cc)||"—"}</td><td>${esc(r.cr)||"—"}</td>
+ <td>${esc(r.pc)||"<b>not determined</b>"}</td><td>${esc(r.cv)||"—"}</td></tr>`))}
+<p class="cap">Results of consolidation tests</p>`:""}
+
+<h3>7.9 Permeability test</h3>
+<p>The coefficient of permeability is the rate at which water flows through the soil under a unit hydraulic gradient. The constant head test is suited to sands and gravels; the falling head test to silts and silty clays; and for clays the coefficient may be derived from the time curve of the consolidation test. Permeability is required for the design of dewatering, for the estimation of the rate at which settlement will occur, and for drainage design.</p>
+
+<h3>7.10 Compaction test</h3>
+<p>The compaction test establishes the relationship between the moisture content at which a soil is compacted and the dry density achieved, giving the maximum dry density and the optimum moisture content. It is required wherever engineered fill is to be placed, including backfill around foundations, and is not applicable to undisturbed natural ground.</p>
+${pg()}
+
+<h2>8. Geological set-up and soil composition</h2>
+<h3>8.1 Regional geology</h3>
+<p>Bangladesh lies almost entirely within the Bengal Basin, one of the largest sedimentary basins in the world, filled by sediment delivered by the Ganges, the Brahmaputra and the Meghna. Depth to bedrock is of the order of kilometres over most of the country, so that every foundation is founded in soil, and the engineering question is not the depth to rock but the depth at which a stratum of sufficient strength and stiffness is first encountered.</p>
+<p>Deposition has been episodic, with repeated flooding, channel migration and abandonment, so that profiles commonly alternate between silt, clay and sand over intervals of a few metres. The phreatic surface is generally shallow and rises towards the ground surface during the monsoon.</p>
+<p>Greater Dhaka is situated on the Madhupur Tract, an uplifted block of Pleistocene sediment standing several metres above the surrounding alluvium, bounded by faults and dissected into low domes and shallow depressions by erosion. The material of the tract is the Madhupur Clay, a reddish brown to brown stiff over-consolidated silty clay, frequently mottled and containing ferruginous nodules, underlain by the dense reddish sands of the Dupi Tila formation. The reddish brown colour is the product of prolonged sub-aerial weathering and oxidation and is the most reliable field indicator that the site is founded on terrace material rather than on recent alluvium.</p>
+<p>Because the Madhupur Clay is over-consolidated, having carried a greater stress in the past than it carries today, a moderate shallow foundation is frequently viable on the terrace at a depth where floodplain soil would require piling.</p>
+
+<h3>8.2 Description of soil composition</h3>
+<p>The following terms are used in this report for the description of soil composition:</p>
+${T(`<th>Term</th><th>Proportion</th>`,[
+["Trace","1 to 10 %"],["Little","11 to 20 %"],["Some","20 to 35 %"],
+["Sandy","35 to 50 % sand"],["Clayey","35 to 50 % clay"],["Silty","35 to 50 % silt"]
+].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(""))}
+${pg()}
+
+<h2>9. Correlation tables of soils based on SPT values</h2>
+<h3>9.1 Cohesionless soils — after Terzaghi and Peck</h3>
+${T(`<th>N value</th><th>Condition</th><th>Relative density</th><th>Angle of internal friction</th><th>Moist unit weight (pcf)</th>`,
+[["0 – 4","Very loose","0.0 – 0.2","25° – 30°","70 – 100"],
+ ["4 – 10","Loose","0.2 – 0.4","30° – 35°","90 – 115"],
+ ["10 – 30","Medium","0.4 – 0.6","35° – 40°","110 – 130"],
+ ["30 – 50","Dense","0.6 – 0.85","40° – 45°","110 – 140"],
+ ["Over 50","Very dense","1.00","45°","130 – 150"]]
+.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join(""))}
+<p class="cap">Table 1 — Unit weight and angle of internal friction of cohesionless soil based on N values</p>
+
+<h3>9.2 Cohesive soils — after Terzaghi and Peck</h3>
+${T(`<th>N value</th><th>Consistency</th><th>Unconfined compressive strength (tsf)</th><th>Cohesion c<sub>u</sub> (tsf)</th>`,
+[["Below 2","Very soft","Below 0.25","Below 0.125"],["2 – 4","Soft","0.25 – 0.50","0.125 – 0.25"],
+ ["4 – 8","Medium","0.50 – 1.00","0.25 – 0.50"],["8 – 15","Stiff","1.00 – 2.00","0.50 – 1.00"],
+ ["15 – 30","Very stiff","2.00 – 4.00","1.00 – 2.00"],["Over 30","Hard","Over 4.00","Over 2.00"]]
+.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join(""))}
+<p class="cap">Table 2 — Consistency and unconfined compressive strength of cohesive soil based on N values</p>
+<p>In the above table the shear strength of cohesive soil is equal to one half of the unconfined compressive strength and the angle of shearing resistance is taken as zero. The correlation adopted in this report is c<sub>u</sub> (tsf) = ${cur} N, applied to the field N value.</p>
+
+<h3>9.3 Correction of field N values</h3>
+<p>The field penetration resistance has been corrected for hammer energy, borehole diameter, sampler type and rod length, and subsequently for effective overburden pressure:</p>
+<p style="text-align:center"><b>N₆₀ = N × (E<sub>m</sub>/60) × C<sub>B</sub> × C<sub>S</sub> × C<sub>R</sub>&nbsp;&nbsp;;&nbsp;&nbsp; N₁₍₆₀₎ = N₆₀ × C<sub>N</sub>&nbsp;&nbsp;;&nbsp;&nbsp; C<sub>N</sub> = √(2000 / σ′<sub>v</sub>) ≤ 1.70</b></p>
+${T(`<th>Factor</th><th>Description</th><th>Value adopted</th>`,[
+["E<sub>m</sub>","Hammer energy ratio",`${V("hammer")} %`],
+["C<sub>B</sub>","Borehole diameter correction",V("cb")],
+["C<sub>S</sub>","Sampler correction",V("cs")],
+["C<sub>R</sub>","Rod length correction","0.75 to 1.00, depth dependent"],
+["C<sub>N</sub>","Overburden correction","computed at each test depth, limited to 1.70"]
+].map(r=>`<tr><td>${r[0]}</td><td style="text-align:left">${r[1]}</td><td>${r[2]}</td></tr>`).join(""))}
+<p class="cap">Table 3 — SPT correction factors adopted</p>
+${pg()}
+
+${pg()}
+<h2>10. Physical properties</h2>
+<h3>10.1 Sub-soil stratification</h3>
+<p>The physical properties of the sub-soil formation of the project area have been evaluated by the execution of ${A.length} number of boring${A.length>1?"s":""} up to ${maxD} ft deep. The strata encountered are summarised below. Layer boundaries are interpolated between sampling depths and should be regarded as approximate.</p>
+${T(`<th>Borehole</th><th>Depth (ft)</th><th>Thickness (m)</th><th>Description of soil strata</th><th>N₆₀ range</th>`,strRows)}
+<p class="cap">Table 4 — Sub-soil stratification</p>
+
+<h3>10.2 Field penetration resistance</h3>
+${T(`<th>Depth (ft)</th><th>Depth (m)</th>${A.map(x=>`<th>${esc(x.name)}</th>`).join("")}<th>Mean</th>`,fieldRows)}
+<p class="cap">Table 5 — Field N values, uncorrected. * denotes a refusal record</p>
+
+<h3>10.3 Corrected penetration resistance</h3>
+${T(`<th>Depth (ft)</th><th>Depth (m)</th>${A.map(x=>`<th>${esc(x.name)}</th>`).join("")}<th>Mean</th>`,n60rows)}
+<p class="cap">Table 6 — Corrected N₆₀ values</p>
+${refCount?`<p><b>Note on refusal records.</b> ${refCount} of the ${all.length} penetration records in this investigation, that is ${Math.round(refCount/all.length*100)} per cent, are refusal records. A refusal record states that the test was terminated; it is not a measurement of the resistance of the stratum. Correlations applied to a refusal record will over-state the strength of the soil, and any design that draws capacity from those depths should be confirmed by static cone penetration testing or by load testing.</p>`:""}
+
+${labRanges().length?`<h3>10.4 Range of variation in laboratory test results</h3>
+${R(`<th>Name of the soil test</th><th>No. of tests</th><th>Range of variation</th>`,
+labRanges().map(r=>`<tr><td style="text-align:left">${esc(r[0])}</td><td>${r[1]}</td><td style="text-align:left">${esc(r[2])}</td></tr>`))}
+<p class="cap">Range of variation in laboratory test results</p>`:""}
+
+<h3>10.5 Consistency and compactness</h3>
+<p>The consistency of the upper soil varies from ${(()=>{const c=all.filter(r=>r.st==="Cohesive").map(r=>r.cls); return c.length?esc(c[0].toLowerCase())+" to "+esc(c[c.length-1].toLowerCase()):"soft to stiff";})()}, increasing gradually with depth.${hasSand?" The underlying granular strata are of medium dense to very dense compactness.":""}</p>
+
+<h3>10.6 Ground water table</h3>
+<p>The position of the ground water table is ${gwtTxt}.</p>
+${pg()}
+
+${pg()}
+<h2>11. Engineering properties</h2>
+<p>The engineering properties of the soil, including the cohesion, the compressibility and the angle of internal granular friction, have been evaluated from the field penetration resistance and from laboratory tests performed on the samples collected during the field investigation.</p>
+
+<h3>11.1 Cohesion</h3>
+<p>${L.uc.length?`The undrained shear strength of the cohesive strata has been determined by unconfined compression testing on undisturbed samples, giving c<sub>u</sub> = q<sub>u</sub>/2. Values range from ${fmt(Math.min(...L.uc.map(ucCu).filter(x=>x!==null)),2)} ksf to ${fmt(Math.max(...L.uc.map(ucCu).filter(x=>x!==null)),2)} ksf.`:""}
+The correlation c<sub>u</sub> (tsf) = ${cur} N after Terzaghi and Peck has been applied to the field penetration resistance where laboratory values are not available.
+At the proposed founding depth of ${Df} ft the design value adopted is <b>${fmt(cu/2,2)} tsf (${fmt(cu,2)} ksf, ${fmt(cu*KSF_KPA,0)} kPa)</b>, taken from ${V("cusrc")==="uc"&&ucCuDf!==null?"the unconfined compression test results":"the penetration resistance correlation"}.</p>
+${L.uc.length&&ucCuDf!==null?`<p>For comparison, the correlation gives ${fmt(cuAt(Df,"mean"),2)} ksf at this depth against ${fmt(ucCuDf,2)} ksf measured. ${Math.abs(cuAt(Df,"mean")-ucCuDf)/ucCuDf<0.2?"The two are in reasonable agreement.":"The difference between the two exceeds 20 per cent and should be investigated before the design value is fixed."}</p>`:""}
+
+<h3>11.2 Angle of internal friction</h3>
+<p>${hasSand?`The angle of internal friction of the cohesionless strata has been obtained from φ = 27.1 + 0.30 N₁₍₆₀₎ − 0.00054 N₁₍₆₀₎² after Wolff (1989), and ranges from ${fmt(Math.min(...all.filter(r=>r.phi!==null).map(r=>r.phi)),1)}° to ${fmt(Math.max(...all.filter(r=>r.phi!==null).map(r=>r.phi)),1)}° over the depth explored.`:"No cohesionless stratum was encountered within the depth explored."}</p>
+${dsPhi.length?`<p>Direct shear testing on samples from the granular stratum gives an angle of internal friction of ${dsPhi.length>1?`${Math.min(...dsPhi)}° to ${Math.max(...dsPhi)}°`:`${dsPhi[0]}°`}, which confirms the values obtained from the correlation. The cohesion intercepts obtained from the same tests are experimental scatter and <b>have been taken as zero in design</b>, as is appropriate for a clean cohesionless soil.</p>`:""}
+
+<h3>11.3 Compressibility</h3>
+<p>The compressibility parameters adopted for the analysis of settlement are a compression index C<sub>c</sub> of ${N("cc")}, a recompression index C<sub>r</sub> of ${N("cr")}, and an initial void ratio e₀ of ${N("e0")}. The soil modulus adopted for the computation of immediate settlement is ${N("es")} ksf.</p>
+${pcKnown?`<p>The pre-consolidation pressure has been determined from the e–log p curve by Casagrande's construction as <b>p<sub>c</sub> = ${fmt(cp.pc,0)} psf</b>. The effective stress at mid-layer after construction is ${fmt(applied,0)} psf. ${crGoverns?"Since the applied stress remains below the pre-consolidation pressure, the soil recompresses and the <b>recompression index governs</b> the settlement.":"Since the applied stress exceeds the pre-consolidation pressure, the soil compresses along the virgin line and the <b>compression index governs</b> the settlement."}</p>`:`<p>The pre-consolidation pressure p<sub>c</sub> has <b>not</b> been established. Its determination from the e–log p curve by Casagrande's construction is required in order to decide whether the compression index or the recompression index governs the settlement of the proposed foundation. Both cases are presented in Section 14.</p>`}
+${pg()}
+
+<h2>12. Evaluation of bearing capacity</h2>
+<h3>12.1 Basis</h3>
+<p>The net ultimate bearing capacity of a shallow foundation founded in cohesive soil has been evaluated from the Skempton–Meyerhof expression, in which the depth factor is limited to 1.5:</p>
+<p style="text-align:center"><b>q<sub>net(ult)</sub> = 5.14 c<sub>u</sub> (1 + 0.2 B/L)(1 + 0.2 D<sub>f</sub>/B)&nbsp;&nbsp;;&nbsp;&nbsp; q<sub>a</sub> = q<sub>net(ult)</sub> / F.S.</b></p>
+<p>Values are presented below at both factors of safety in common use, so that the effect of the choice is visible. <b>A single factor of safety must be selected and applied consistently throughout the design.</b></p>
+
+<h3>12.2 Bearing capacity against footing width</h3>
+${T(`<th>B (ft)</th><th>Shape factor</th><th>Depth factor</th><th>q<sub>net(ult)</sub> (ksf)</th><th>q<sub>a</sub> at F.S. ${fa} (ksf)</th><th>q<sub>a</sub> at F.S. ${fa} (tsf)</th><th>q<sub>a</sub> at F.S. ${fb} (ksf)</th><th>q<sub>a</sub> at F.S. ${fb} (tsf)</th>`,
+brows.map(r=>`<tr><td>${r.B}</td><td>${fmt(r.shape)}</td><td>${fmt(r.depth)}</td><td>${fmt(r.q)}</td>
+  <td>${fmt(r.q/fa)}</td><td><b>${fmt(r.q/fa/2)}</b></td><td>${fmt(r.q/fb)}</td><td><b>${fmt(r.q/fb/2)}</b></td></tr>`).join(""))}
+<p class="cap">Table 7 — Net allowable bearing pressure, square footings at D<sub>f</sub> = ${Df} ft</p>
+<p>Moving from a factor of safety of ${fa} to ${fb} reduces the allowable bearing pressure by ${fmt((1-fa/fb)*100,0)} per cent.</p>
+
+${pg()}
+<h3>12.3 Bearing capacity by borehole and depth</h3>
+${T(`<th>Borehole</th><th>Depth (ft)</th><th>Field N</th><th>c<sub>u</sub> (tsf)</th><th>Raft foundation (tsf)</th><th>Square footing, B = 6 ft (tsf)</th>`,bcRows)}
+<p class="cap">Table 8 — Net allowable bearing pressure by borehole, F.S. = ${fb}</p>
+${pg()}
+
+<h3>12.4 Bearing capacity of piles</h3>
+<p>The axial compressive capacity of a single pile has been evaluated as the sum of the shaft friction mobilised along the embedded length and the end bearing developed at the toe. For a ${N("pd")} mm diameter ${V("ptype")==="bored"?"bored cast-in-situ":"driven"} pile:</p>
+<p style="text-align:center"><b>Q<sub>ult</sub> = Q<sub>s</sub> + Q<sub>p</sub>&nbsp;&nbsp;;&nbsp;&nbsp; Q<sub>all</sub> = Q<sub>ult</sub> / ${N("fsp")}</b></p>
+${V("ptype")==="bored"?"<p>The values of shaft friction and end bearing have been halved in making the preliminary estimate of the carrying capacity of a bored reinforced concrete pile.</p>":""}
+${pileSec}
+<p class="cap">Table 9 — Skin friction and end bearing capacities of piles. * denotes a refusal record</p>
+${pg()}
+
+${pg()}
+<h2>13. Formulae used for computation</h2>
+<h3>13.1 Bearing capacity, cohesive soil</h3>
+<p style="text-align:center"><b>q<sub>net(ult)</sub> = 5.14 c<sub>u</sub> (1 + 0.2 B/L)(1 + 0.2 D<sub>f</sub>/B), depth factor ≤ 1.5</b></p>
+<p>where c<sub>u</sub> is the undrained shear strength, B the footing width, L the footing length and D<sub>f</sub> the founding depth.</p>
+
+<h3>13.2 Bearing capacity, cohesionless soil</h3>
+<p style="text-align:center"><b>q<sub>ult</sub> = c N<sub>c</sub> S<sub>c</sub> + γ D<sub>f</sub> N<sub>q</sub> + 0.5 γ B N<sub>γ</sub> S<sub>γ</sub></b></p>
+<p>where N<sub>c</sub>, N<sub>q</sub> and N<sub>γ</sub> are the bearing capacity factors, functions of the angle of internal friction, and S<sub>c</sub> and S<sub>γ</sub> are shape factors. In a clean cohesionless soil the cohesion c is taken as zero.</p>
+
+<h3>13.3 Correction of penetration resistance</h3>
+<p style="text-align:center"><b>N₆₀ = N (E<sub>m</sub>/60) C<sub>B</sub> C<sub>S</sub> C<sub>R</sub>&nbsp;&nbsp;;&nbsp;&nbsp; C<sub>N</sub> = √(2000/σ′<sub>v</sub>) ≤ 1.70&nbsp;&nbsp;;&nbsp;&nbsp; N₁₍₆₀₎ = N₆₀ C<sub>N</sub></b></p>
+
+<h3>13.4 Soil parameters from penetration resistance</h3>
+<p style="text-align:center"><b>c<sub>u</sub> (tsf) = ${cur} N&nbsp;&nbsp;;&nbsp;&nbsp; φ = 27.1 + 0.30 N₁₍₆₀₎ − 0.00054 N₁₍₆₀₎²</b></p>
+
+<h3>13.5 Skin friction and end bearing</h3>
+<p style="text-align:center"><b>Cohesive: f<sub>s</sub> = α c<sub>u</sub>, q<sub>p</sub> = 9 c<sub>u</sub></b></p>
+<p style="text-align:center"><b>Cohesionless: f<sub>s</sub> (kPa) = ${N("ks")} N₆₀ ≤ ${N("fsmax")} kPa&nbsp;&nbsp;;&nbsp;&nbsp; q<sub>p</sub> (kPa) = 40 N₆₀ (L/D) ≤ 400 N₆₀, limited to ${N("qbmax")} kPa</b></p>
+
+<h3>13.6 Settlement</h3>
+<p style="text-align:center"><b>S<sub>c</sub> = (C / (1 + e₀)) H log₁₀((p₀ + Δp) / p₀)&nbsp;&nbsp;;&nbsp;&nbsp; S<sub>i</sub> = q B (1 − ν²) I<sub>f</sub> / E<sub>s</sub></b></p>
+<p>where C is the compression index for a normally consolidated soil or the recompression index for an over-consolidated soil, e₀ the initial void ratio, H the thickness of the compressible stratum, p₀ the initial effective overburden pressure at mid-layer, Δp the stress increase at mid-layer, ν Poisson's ratio and I<sub>f</sub> the influence factor.</p>
+
+<h3>13.7 Stress distribution</h3>
+<p style="text-align:center"><b>Δp = q B L / ((B + z)(L + z))</b></p>
+<p>the two vertical to one horizontal approximation, where z is the depth below founding level.</p>
+${pg()}
+
+${pg()}
+<h2>14. Computation for consolidation settlement</h2>
+<p>The vertical downward movement of the base of a building is called settlement. Its effect upon the structure depends on its magnitude, its uniformity, the length of time over which it takes place, and the nature of the underlying soils. Consolidation settlement is calculated from the results of the unit weight and consolidation tests.</p>
+<p>The computation below is carried out for a footing of ${fmt(sB,1)} ft × ${fmt(sL,1)} ft founded at ${Df} ft below existing ground level and carrying a net bearing pressure of ${fmt(sq,2)} ksf (${fmt(sq/2,2)} tsf), over a compressible stratum of ${fmt(st.H,0)} ft thickness.</p>
+${T(`<th>Step</th><th>Quantity</th><th>Value</th>`,[
+["1","Thickness of compressible stratum, H",`${fmt(st.H,1)} ft`],
+["2","Depth to mid-layer below existing ground level",`${fmt(st.dmid,1)} ft`],
+["3","Depth below founding level to mid-layer, z",`${fmt(st.z,1)} ft`],
+["4","Initial effective overburden pressure at mid-layer, p₀",`${fmt(st.p0,0)} psf`],
+["5","Stress increase at mid-layer, Δp",`${fmt(st.dp,0)} psf`],
+["6","Stress ratio (p₀ + Δp) / p₀",`${fmt((st.p0+st.dp)/st.p0,3)}`],
+["7","log₁₀ of stress ratio",`${fmt(st.lt,4)}`],
+["8","Immediate settlement, S<sub>i</sub>",`${fmt(st.Si,1)} mm`],
+["9",`Consolidation settlement using C<sub>r</sub> = ${N("cr")}`,`${fmt(st.ScB,1)} mm`],
+["10",`Consolidation settlement using C<sub>c</sub> = ${N("cc")}`,`${fmt(st.ScA,1)} mm`]
+].map(r=>`<tr><td>${r[0]}</td><td style="text-align:left">${r[1]}</td><td>${r[2]}</td></tr>`).join(""))}
+<p class="cap">Table 10 — Computation of settlement</p>
+
+<h3>14.1 Result and comparison with permissible limits</h3>
+${T(`<th>Case</th><th>S<sub>i</sub> (mm)</th><th>S<sub>c</sub> (mm)</th><th>Total (mm)</th><th>Total (in.)</th><th>Permissible (mm)</th><th>Result</th>`,
+[["Over-consolidated, C<sub>r</sub> governs",st.Si,st.ScB,tB],
+ ["Normally consolidated, C<sub>c</sub> governs",st.Si,st.ScA,tA]]
+.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${fmt(r[1],1)}</td><td>${fmt(r[2],1)}</td>
+ <td><b>${fmt(r[3],1)}</b></td><td>${fmt(r[3]/25.4,2)}</td><td>${N("sall")}</td><td><b>${verdictOf(r[3])[1]}</b></td></tr>`).join(""))}
+<p class="cap">Table 11 — Total settlement against permissible limits</p>
+${pcKnown?`<h3>14.3 Governing case</h3>
+<p>The pre-consolidation pressure has been determined as p<sub>c</sub> = ${fmt(cp.pc,0)} psf. The effective stress at mid-layer after construction is p₀ + Δp = ${fmt(applied,0)} psf.</p>
+<p style="text-align:center"><b>${crGoverns?`p₀ + Δp = ${fmt(applied,0)} psf &lt; p<sub>c</sub> = ${fmt(cp.pc,0)} psf → recompression, C<sub>r</sub> governs`:`p₀ + Δp = ${fmt(applied,0)} psf &gt; p<sub>c</sub> = ${fmt(cp.pc,0)} psf → virgin compression, C<sub>c</sub> governs`}</b></p>
+<p>The total settlement of the proposed foundation is therefore <b>${fmt(govTot,0)} mm (${fmt(govTot/25.4,2)} in.)</b> against a permissible value of ${N("sall")} mm. <b>${verdictOf(govTot)[1]}</b>${verdictOf(govTot)[1]!=="PASSES"?" — the foundation as proposed does not satisfy the settlement criterion and shall be revised in accordance with Section 17.":"."}</p>
+${cp.cv!==null?`<p>With a coefficient of consolidation c<sub>v</sub> = ${cp.cv} ft²/day and a drainage path of ${fmt(st.H/2,1)} ft, the time for 90 per cent of the primary consolidation to occur is approximately ${fmt(0.848*Math.pow(st.H/2,2)/cp.cv/365,1)} years.</p>`:`<p>The coefficient of consolidation c<sub>v</sub> has not been reported, so the <i>rate</i> at which this settlement will occur cannot be estimated. Only its magnitude is established.</p>`}`
+:`<p>The difference between the two cases is a factor of ${fmt(tA/Math.max(tB,0.01),1)}. Which case governs depends upon the pre-consolidation pressure p<sub>c</sub>, which has <b>not</b> been determined. <b>Until p<sub>c</sub> is established from the e–log p curve, the normally consolidated case shall be taken as governing the design.</b></p>`}
+${pg()}
+<h3>14.2 Sensitivity to footing width</h3>
+<p>The following table shows the effect of footing width at the same net bearing pressure of ${fmt(sq,2)} ksf.</p>
+${T(`<th>B = L (ft)</th><th>&Delta;p (psf)</th><th>S<sub>i</sub> (mm)</th><th>Total, C<sub>r</sub> (mm)</th><th>Total, C<sub>c</sub> (mm)</th><th>Result, C<sub>c</sub> case</th>`,
+[3,4,5,6,8,10,12,15,20].map(b=>{const x=settleCalc(b,b,sq),ta=x.Si+x.ScA;
+ return `<tr><td>${b}</td><td>${fmt(x.dp,0)}</td><td>${fmt(x.Si,1)}</td><td>${fmt(x.Si+x.ScB,1)}</td>
+ <td>${fmt(ta,1)}</td><td>${verdictOf(ta)[1]}</td></tr>`;}).join(""))}
+<p class="cap">Table 12 — Settlement against footing width at constant bearing pressure</p>
+<p>It should be noted that settlement increases with footing width at constant bearing pressure, because a wider footing distributes stress deeper into the compressible stratum. Enlarging a footing therefore does not necessarily reduce settlement, and beyond a certain column load no isolated footing will satisfy both the bearing capacity and the settlement criteria. In that event a raft foundation or a piled foundation is required.</p>
+${pg()}
+
+<h2>15. Seismic design parameters</h2>
+<p>The project area falls within the seismic zoning map of Bangladesh as set out in BNBC 2020, Part 6. The seismic zone coefficient, the site classification and the associated design parameters shall be taken from the current edition of the Code. Coefficients quoted in earlier editions are not applicable and shall not be carried into the structural design.</p>
+${T(`<th>Zone</th><th>Seismic zone coefficient Z</th><th>Representative areas</th>`,
+[["1","0.12","Khulna, Barisal, parts of Jashore"],["2","0.20","Dhaka, Rajshahi, Kushtia, Faridpur"],
+ ["3","0.28","Bogura, Mymensingh, Comilla, Chattogram"],["4","0.36","Sylhet, Rangpur, northeastern hill districts"]]
+.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left">${r[2]}</td></tr>`).join(""))}
+<p class="cap">Table 13 — Seismic zone coefficients, BNBC 2020</p>
+${(()=>{ const h=S.holes[S.active]||S.holes[0]; if(!h) return "";
+  let sd=0, den=0, prev=0;
+  h.rows.forEach(r=>{ const n=num(r.n); if(!n) return; const dz=r.d-prev; prev=r.d; sd+=dz; den+=dz/n; });
+  const nb=den>0?sd/den:null;
+  const cls = nb===null?"—":nb>50?"SB":nb>=15?"SC":"SD";
+  return `<h3>15.1 Site classification</h3>
+  <p>The site class is determined from the harmonic mean penetration resistance over the upper 30 m, N̄ = Σd<sub>i</sub> / Σ(d<sub>i</sub>/N<sub>i</sub>). For ${esc(h.name)} over the ${sd} ft explored, N̄ = <b>${nb===null?"—":fmt(nb,1)}</b>, which corresponds to <b>Site Class ${cls}</b>.</p>
+  <p>The classification is defined over the upper 30 m whereas the boring reached ${fmt(maxD*FT_M,1)} m. The value is therefore indicative. Where the structural design is sensitive to site class, one borehole should be extended to 30 m or a shear wave velocity survey commissioned.</p>`;
+})()}
+${T(`<th>Site class</th><th>Description</th><th>N̄ over top 30 m</th><th>Shear wave velocity (m/s)</th>`,
+[["SA","Hard rock","—","> 800"],["SB","Rock or very dense soil","> 50","360 – 800"],
+ ["SC","Dense to medium dense soil","15 – 50","180 – 360"],["SD","Stiff to soft soil","< 15","< 180"],
+ ["SE","Soft soil profile, or more than 3 m of soft clay","—","—"]]
+.map(r=>`<tr><td>${r[0]}</td><td style="text-align:left">${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join(""))}
+<p class="cap">Table 14 — Site classification, BNBC 2020</p>
+${pg()}
+
+${pg()}
+<h2>16. Conclusions</h2>
+<p>On the basis of the above analysis and discussion, the following conclusions may be drawn regarding the sub-soil condition of the project area.</p>
+<ul>
+<li>The overall soil formation of the investigated site is ${A.length>1?"more or less regular between the borehole locations":"described by a single boring and lateral variation cannot be assessed"}.</li>
+<li>The top layer of the investigated site comprises ${esc((all.find(r=>r.st==="Cohesive")||all[0]).desc)}.</li>
+${hasSand?`<li>The underlying soil is granular, extending to the final depth of boring.</li>`:""}
+<li>Corrected penetration resistance increases with depth from ${fmt(Math.min(...n60v),0)} to ${fmt(Math.max(...n60v),0)} blows per foot over the depth explored.</li>
+<li>Bearing capacities for a shallow foundation as isolated column footing are moderate and adequate for the proposed structure at the founding depth considered.</li>
+<li><b>Settlement, and not shear failure, governs the design of the foundation on this site.</b> ${pcKnown?`With p<sub>c</sub> = ${fmt(cp.pc,0)} psf established, the ${crGoverns?"recompression":"virgin compression"} index governs and the computed total settlement is <b>${fmt(govTot,0)} mm</b> against a permissible value of ${N("sall")} mm — <b>${verdictOf(govTot)[1]}</b>.`:`The computed total settlement is ${fmt(tB,0)} mm if the stratum is over-consolidated and ${fmt(tA,0)} mm if it is normally consolidated, against a permissible value of ${N("sall")} mm.`}</li>
+${pcKnown?"":"<li>The pre-consolidation pressure has not been determined and is required in order to resolve the settlement.</li>"}
+${gwt===0?"<li><b>The position of the ground water table was not recorded during the field work and must be measured before the design is finalised.</b></li>":""}
+${refCount?`<li>${Math.round(refCount/all.length*100)} per cent of the penetration records are refusal records, and no measurement of strength is available below the depth at which refusal first occurred.</li>`:""}
+</ul>
+
+${pg()}
+<h2>17. Conclusion &amp; Recommendation</h2>
+<h3 style="text-decoration:underline">Conclusion:</h3>
+<p>The overall investigation results of the site defines that <b>${foundationRec==="shallow"?"Shallow":"Pile"} Foundation</b> is suitable for the best economic and structurally safe of the project.</p>
+<p style="font-size:12px;color:var(--ink-2)">Basis: computed settlement of ${fmt(settleTot,0)} mm against a permissible ${N("sall")} mm, at the footing size assumed in Section 14 (B = L = ${fmt(sB,1)} ft, q = ${fmt(sq,2)} ksf) — <b>${settleVerdict[1]}</b>.${pcKnown?"":" Pre-consolidation pressure not established; the normally-consolidated (worse) case is used pending Casagrande's construction."}</p>
+<h3 style="text-decoration:underline">RECOMMENDATION</h3>
+<p>The following recommendations are suggested for the construction of the proposed ${ph("struct")} at ${ph("location")}.</p>
+
+<h3 style="text-decoration:underline">SHALLOW FOUNDATION</h3>
+<p>a. Shallow foundation including ${esc(V("shdesc"))||"Continuous wall/RCC Strip as well as Isolated type footing"} shall be provided for the proposed building.</p>
+<p style="text-decoration:underline"><b>At ${Df}.00ft Below The EGL At (${ph("struct")})</b></p>
+<p>* To be <b>${qAllow}</b> Tsf (F.S=${fb}) for the ${esc(V("shdesc"))||"Continuous wall/RCC Strip"} footing foundation.</p>
+
+<h3 style="text-decoration:underline">PILE FOUNDATION</h3>
+${Chk("usesand")?`<h4 style="text-decoration:underline;margin:10px 0 4px">SAND PILE :</h4>
+<p>Sand pile may be provided with compaction from the depth <b>${N("spstart")}'-0"</b> and downwards, pile should be average (<b>${N("spdia")} inch</b>) diameter and the embedment length up to <b>${N("spembed")}'-0"</b> from the base level of footing at footing area considering spacing of pile (${esc(V("spspacing"))}) center to center. After sand piling the bearing capacity of should <b>${fmt(N("spcap"),2)} tsf</b>, confirming by <b>plate load test</b>.</p>`:""}
+${Chk("useprecast")?`<h4 style="text-decoration:underline;margin:10px 0 4px">ALTERNATIVELY:</h4>
+<p>Pre-cast pile of <b>${esc(V("pcsize"))}</b> Size can be used at a depth of <b>${N("pcdepth")}'-0"</b> from the cut of level (cut of level = ${N("cutlvl")}'-0" from the E.G.L.)${V("pcbh")?` around the <b>${esc(V("pcbh"))}</b>`:""}.</p>`:""}
+${pileRec.rows.length?`<h4 style="text-decoration:underline;margin:10px 0 4px">ALTERNATIVELY:</h4>
+<p>Cast-in-situ Pile ${pileRec.dias.map(d=>`<b>${d.inch}"</b>`).join(" Or ")} Size. However we may accept the embedment length upto <b>${fmt(pileRec.maxD-N("cutlvl"),0)}'-0"</b> from the Cut of Level (Cut of Level ${N("cutlvl")}'-0") from the E.G.L.</p>
+${T(`<th>Length below from EGL</th>${pileRec.dias.map(d=>`<th>${d.inch} inch Size</th>`).join("")}`,
+pileRec.rows.map(r=>`<tr><td>${ftIn(r.depth)}</td>${r.vals.map(v=>`<td>${fmt(v,2)} ton</td>`).join("")}</tr>`).join(""))}
+<p class="cap">Table 9 — Bearing capacity of single pile at different diameter and depth, ${esc(S.holes[S.active].name)}</p>`:""}
+
+<p><b>Note.</b></p>
+<p>a) 1Tsf = 2ksf = 1.09 Kg/cm², 1Ton = 1000kg = 2000 Lbs, E.G.L. = Existing Ground Level.<br>
+b) The theories on the ultimate bearing capacity presented in this report are based on idealized conditions of soil profiles. This is, in most field conditions, not true. Soil profiles are not always homogenous and isotropic.<br>
+c) Pile load test should be performed; if pile load test is not performed, then the value of pile capacity should be considered half.<br>
+d) Hence, experience and judgment are always necessary in adopting proper soil parameters to use in the calculation of ultimate bearing capacity.</p>
+<p><b>However, the design Engineer may select any other alternative type, depth as well as the bearing capacity of the foundation in the light of information provided in this report.</b></p>
+
+${pileByDia.length?`<h3>17.1 Supporting calculation — pile capacity build-up by depth</h3>
+<p>The following gives the full skin friction and end bearing build-up behind Table 9 above, at every SPT sampling depth in ${esc(S.holes[S.active].name)}, for each diameter.</p>
+${pileByDia.map(x=>`<h5 style="margin:12px 0 4px;font-size:12px;font-weight:600;color:var(--ink-2)">Diameter ${x.Dmm} mm</h5>
+${T(`<th>Depth (ft)</th><th>f<sub>s</sub> (ksf)</th><th>Q<sub>s</sub> (tons)</th><th>Q<sub>p</sub> (tons)</th><th>Q<sub>ult</sub> (tons)</th><th>Q<sub>all</sub> (tons), F.S. ${x.FS}</th><th>Q<sub>all</sub> (kN)</th>`,
+x.out.map(r=>`<tr><td>${r.d}${r.refusal?"*":""}</td><td>${fmt(r.fs,3)}</td><td>${fmt(r.Qs,1)}</td><td>${fmt(r.Qp,1)}</td>
+  <td>${fmt(r.Qu,1)}</td><td><b>${fmt(r.Qa,1)}</b></td><td>${fmt(r.Qa*8.896,0)}</td></tr>`).join(""))}`).join("")}
+<p class="cap">Table 9A — Pile capacity build-up by depth for each diameter, ${esc(S.holes[S.active].name)}. * denotes a refusal record.</p>`:""}
+<h3>17.2 Actions required before the design is issued for construction</h3>
+
+<ul>
+${pcKnown?"":"<li>Determine the pre-consolidation pressure p<sub>c</sub> from the existing consolidation data by Casagrande's construction.</li>"}
+${gwt===0?"<li>Measure the ground water level in a standpipe, in both dry and wet season if practicable.</li>":""}
+${L.uc.length&&ucCuDf!==null?"":"<li>Obtain undisturbed samples at founding level in at least two boreholes and confirm the design undrained shear strength, which is presently taken from a correlation.</li>"}
+${cp.cv!==null?"":"<li>Obtain the coefficient of consolidation c<sub>v</sub> so that the rate of settlement, as well as its magnitude, can be estimated.</li>"}
+</ul>
+<h3>17.4 Construction requirements</h3>
+<ul>
+<li>All foundation excavations shall be inspected and approved at founding level before blinding concrete is placed. Any soft or disturbed material shall be removed and replaced with lean concrete.</li>
+<li>The foundation base shall be kept dry during the construction period.</li>
+<li>Dewatering shall be provided for excavation extending below the water table, and the sides of excavation shall be adequately supported.</li>
+<li>Backfill around the foundation shall be compacted to 95 per cent of the maximum dry density determined by the Standard Proctor test.</li>
+<li>Seismic design parameters shall be taken from BNBC 2020, Part 6, as set out in Section 15.</li>
+</ul>
+<h3>17.5 Notes</h3>
+<ul>
+<li>1 tsf = 2 ksf = 95.78 kN/m² = 0.976 kg/cm²; 1 ton = 9.81 kN = 1000 kg; 1 m = 3.28 ft.</li>
+<li>EGL denotes existing ground level and F.S. denotes factor of safety.</li>
+<li>The designer may select an alternative foundation type, depth and bearing capacity in the light of the information provided in this report.</li>
+</ul>
+
+<h2>18. Limitations</h2>
+<p>The conclusions presented in this report are based on the sub-soil conditions encountered at the exploration points on the date of exploration, and on the results of the field and laboratory testing described. Sub-surface conditions may vary between and beyond the points explored. Should conditions differing from those described be encountered during construction, this office shall be informed so that the recommendations may be reviewed and revised as necessary.</p>
+<p>This report has been prepared for the exclusive use of ${ph("client")} for the project named on the title page, and shall not be relied upon by any other party or for any other project without written consent.</p>
+
+<div class="sig"><div>Prepared by<br><br><br><b>${V("engineer")?esc(V("engineer")):"&nbsp;"}</b><br>
+${esc(V("engtitle"))}<br>${ph("firm")}<br>
+<span style="font-size:10.5px">${esc(V("addr"))}<br>${V("email")?"Email: "+esc(V("email")):""}${V("email")&&V("mobile")?" · ":""}${V("mobile")?"Mobile: "+esc(V("mobile")):""}</span></div>
+<div>Checked and approved by<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;</div></div>
+${pg()}
+
+${pg()}
+<h2>19. Field and laboratory record checklist</h2>
+<p>The following checklist records the completeness of the investigation against the requirements of BNBC 2020, Part 6, Chapter 3. Items marked as outstanding are to be completed before the design is issued for construction.</p>
+<h3>19.1 Field record</h3>
+${T(`<th>Item</th><th>Requirement</th><th>Status</th>`,[
+["Number of boreholes","One per 200 to 500 m² of built-up area, or at the corners of the footprint",`${A.length} executed`],
+["Depth of exploration","Not less than 2 B below founding level for isolated footings",`${maxD} ft, adequate`],
+["SPT interval","At every change of stratum and not more than 1.5 m",`${N("int")} ft, compliant`],
+["Disturbed sampling","At every SPT depth and every change of stratum",`${all.length} samples`],
+["Undisturbed sampling","From cohesive strata by thin-walled tube, at founding level and mid-layer","To be confirmed"],
+["Ground water level on completion","Measured and recorded with the time of reading", gwt===0?"<b>OUTSTANDING</b>":"Recorded"],
+["Ground water level after stabilisation","Measured after 24 hours", gwt===0?"<b>OUTSTANDING</b>":"To be confirmed"],
+["Reduced level of borehole collars","Levelled to a single site datum","To be confirmed"],
+["Hammer type and rod length","Recorded on the log for the energy and rod corrections",`E<sub>m</sub> = ${V("hammer")} % assumed`],
+["Bore logs signed","By the team leader and the client's representative","To be confirmed"]
+].map(r=>`<tr><td style="text-align:left">${r[0]}</td><td style="text-align:left">${r[1]}</td><td>${r[2]}</td></tr>`).join(""))}
+<p class="cap">Table 15 — Field record checklist</p>
+
+<h3>19.2 Laboratory programme</h3>
+${R(`<th>Test</th><th>No. of tests</th><th>Status</th>`,[
+["Natural moisture content",L.idx.filter(r=>num(r.nmc)!==null).length],
+["Atterberg limits",L.idx.filter(r=>num(r.ll)!==null).length],
+["Grain size analysis",L.idx.filter(r=>num(r.sand)!==null).length],
+["Specific gravity",L.idx.filter(r=>num(r.gs)!==null).length],
+["Unconfined compression",L.uc.length],
+["Direct shear",L.ds.length],
+["Consolidation",L.cons.length],
+["Pre-consolidation pressure p<sub>c</sub>",pcKnown?1:0],
+["Coefficient of consolidation c<sub>v</sub>",cp.cv!==null?1:0],
+["Permeability",0],["Compaction",0]
+].map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${r[1]||"—"}</td>
+ <td>${r[1]?"Completed":"<b>Not performed</b>"}</td></tr>`))}
+<p class="cap">Table 16 — Laboratory programme</p>
+
+<h3>19.3 Completeness of the investigation</h3>
+${R(`<th>Requirement</th><th>Status</th>`,
+comp.items.map(r=>`<tr><td style="text-align:left">${esc(r[0])}</td><td>${r[1]?"Complete":"<b>OUTSTANDING</b>"}</td></tr>`))}
+<p class="cap">Table 17 — Completeness: ${comp.done} of ${comp.total} items (${comp.pct} per cent)</p>
+
+<h3>19.4 Report review</h3>
+${T(`<th>Item</th><th>Status</th>`,[
+["Every table reproducible from the formulae stated in Section 13","Yes"],
+["A single factor of safety stated and applied consistently",`F.S. = ${fb} adopted for the recommendation`],
+["Settlement computed and compared against the permissible limit",`Yes — Section 14`],
+["Ground water position stated and shown on every bore log", gwt===0?"<b>OUTSTANDING</b>":"Yes"],
+["Seismic parameters taken from the current code edition","BNBC 2020 — Section 15"],
+["Site class computed with the arithmetic shown","Yes — Section 15.1"],
+["Recommendation states type, depth, pressure, factor of safety and settlement","Yes — Section 17"],
+["Construction requirements included","Yes — Section 17.4"],
+["Limitations stated","Yes — Section 18"],
+["All attachments present and legible","To be confirmed on issue"]
+].map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${r[1]}</td></tr>`).join(""))}
+<p class="cap">Table 18 — Report review checklist</p>
+${pg()}
+
+<h2>Attachment A — Site plan</h2>
+<p>The site plan showing the plot boundary with dimensions, the adjoining road, the north point and the positions of the boreholes with offsets is to be attached here.</p>
+<div style="border:1px dashed #999;height:420px;display:flex;align-items:center;justify-content:center;color:#999;font-style:italic;margin-top:14px">Site plan — insert drawing</div>
+${logSheets}
+${pg()}
+
+<h2>Attachment C — Grain size analysis</h2>
+${L.idx.some(r=>num(r.sand)!==null)?`${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>Sand (%)</th><th>Silt (%)</th><th>Clay (%)</th><th>LL (%)</th><th>PL (%)</th><th>PI (%)</th><th>NMC (%)</th><th>G<sub>s</sub></th><th>Soil classification</th><th>Group</th>`,
+L.idx.map(r=>{const al=aLine(r),pl=(num(r.ll)!==null&&num(r.pi)!==null)?num(r.ll)-num(r.pi):null;
+ return `<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td><td>${esc(r.sand)||"—"}</td>
+ <td>${esc(r.silt)||"—"}</td><td>${esc(r.clay)||"—"}</td><td>${esc(r.ll)||"—"}</td><td>${pl!==null?pl:"—"}</td>
+ <td>${esc(r.pi)||"—"}</td><td>${esc(r.nmc)||"—"}</td><td>${esc(r.gs)||"—"}</td>
+ <td style="text-align:left">${esc(r.cls)}</td><td>${al?al.grp:"—"}</td></tr>`;}))}
+<p class="cap">Grain size distribution and index properties</p>`:`<p>Grain size distribution curves with the soil classification table are to be attached here.</p>
+<div style="border:1px dashed #999;height:380px;display:flex;align-items:center;justify-content:center;color:#999;font-style:italic;margin-top:14px">Grain size curves — insert sheets</div>`}
+<p><i>The plotted curves from the laboratory sheets are to be appended to this attachment.</i></p>
+${pg()}
+<h2>Attachment D — Unconfined compression tests</h2>
+${L.uc.length?`${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>q<sub>u</sub> (psi)</th><th>q<sub>u</sub> (ksf)</th><th>c<sub>u</sub> (ksf)</th><th>c<sub>u</sub> (kPa)</th><th>Strain at failure (%)</th><th>Wet density (pcf)</th><th>Dry density (pcf)</th><th>NMC (%)</th><th>Consistency</th>`,
+L.uc.map(r=>{const cu=ucCu(r);return `<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td>
+ <td>${esc(r.qu)}</td><td>${num(r.qu)!==null?fmt(num(r.qu)*0.144,2):"—"}</td><td><b>${cu!==null?fmt(cu,2):"—"}</b></td>
+ <td>${cu!==null?fmt(cu*KSF_KPA,0):"—"}</td><td>${esc(r.st)||"—"}</td><td>${esc(r.wet)||"—"}</td>
+ <td>${esc(r.dry)||"—"}</td><td>${esc(r.nmc)||"—"}</td><td>${consistencyOf(cu)}</td></tr>`;}))}
+<p class="cap">Unconfined compression test results</p>`:`<p>Stress–strain curves are to be attached here.</p>
+<div style="border:1px dashed #999;height:380px;display:flex;align-items:center;justify-content:center;color:#999;font-style:italic;margin-top:14px">Unconfined compression — insert sheets</div>`}
+<p><i>The plotted curves from the laboratory sheets are to be appended to this attachment.</i></p>
+${pg()}
+<h2>Attachment E — Consolidation tests</h2>
+${L.cons.length?`${R(`<th>BH</th><th>Depth (ft)</th><th>G<sub>s</sub></th><th>Dry density (pcf)</th><th>NMC (%)</th><th>e&#8320;</th><th>C<sub>c</sub></th><th>C<sub>r</sub></th><th>p<sub>c</sub> (psf)</th><th>c<sub>v</sub> (ft&sup2;/day)</th>`,
+L.cons.map(r=>`<tr><td>${esc(r.bh)}</td><td>${esc(r.d)}</td><td>${esc(r.gs)||"—"}</td><td>${esc(r.dry)||"—"}</td>
+ <td>${esc(r.nmc)||"—"}</td><td>${esc(r.e0)||"—"}</td><td>${esc(r.cc)||"—"}</td><td>${esc(r.cr)||"—"}</td>
+ <td>${esc(r.pc)||"<b>not determined</b>"}</td><td>${esc(r.cv)||"—"}</td></tr>`))}
+<p class="cap">Consolidation test results</p>
+${pcKnown?"":"<p><b>Note.</b> The pre-consolidation pressure has not been extracted from the e–log p curve. It should be determined by Casagrande's construction and entered, since it decides which compression index governs the settlement.</p>"}`:`<p>The void ratio against log pressure curve is to be attached here.</p>
+<div style="border:1px dashed #999;height:380px;display:flex;align-items:center;justify-content:center;color:#999;font-style:italic;margin-top:14px">Consolidation curves — insert sheets</div>`}
+<p><i>The plotted curves from the laboratory sheets are to be appended to this attachment.</i></p>
+${pg()}
+<h2>Attachment F — Direct shear tests</h2>
+${L.ds.length?`${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>&phi; (degrees)</th><th>c (psi)</th><th>c (ksf)</th><th>c adopted in design</th>`,
+L.ds.map(r=>`<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td><td>${esc(r.phi)}&deg;</td>
+ <td>${esc(r.c)}</td><td>${num(r.c)!==null?fmt(num(r.c)*0.144,3):"—"}</td><td><b>0</b></td></tr>`))}
+<p class="cap">Direct shear test results. The cohesion intercept in a clean cohesionless soil is experimental scatter and is taken as zero in design</p>`:`<p>Plots of normal stress against shearing stress are to be attached here.</p>
+<div style="border:1px dashed #999;height:380px;display:flex;align-items:center;justify-content:center;color:#999;font-style:italic;margin-top:14px">Direct shear — insert sheets</div>`}
+<p><i>The plotted curves from the laboratory sheets are to be appended to this attachment.</i></p>
+${pg()}
+<h2>Attachment G — Summary of test results</h2>
+${T(`<th>Borehole</th><th>Depth (ft)</th><th>Field N</th><th>N₆₀</th><th>N₁₍₆₀₎</th><th>Consistency / density</th><th>φ (°)</th><th>c<sub>u</sub> (tsf)</th><th>σ′<sub>v</sub> (psf)</th>`,
+A.map(h=>h.rows.map(r=>`<tr><td>${esc(h.name)}</td><td>${r.d}</td><td>${r.n!==null?r.n:"—"}${r.refusal?"*":""}</td>
+ <td>${fmt(r.N60,1)}</td><td>${fmt(r.N160,1)}</td><td>${esc(r.cls)}</td>
+ <td>${r.phi!==null?fmt(r.phi,1):"—"}</td><td>${r.cuT!==null?fmt(r.cuT,2):"—"}</td>
+ <td>${fmt(r.svp,0)}</td></tr>`).join("")).join(""))}
+<p class="cap">Summary of all field and derived results. * denotes a refusal record</p>
+${L.idx.length?`<h3>Laboratory results summary</h3>
+${R(`<th>BH</th><th>Sample</th><th>Depth (ft)</th><th>NMC (%)</th><th>LL (%)</th><th>PI (%)</th><th>Sand (%)</th><th>Silt (%)</th><th>Clay (%)</th><th>G<sub>s</sub></th><th>q<sub>u</sub> (psi)</th><th>&phi; (deg)</th><th>C<sub>c</sub></th>`,
+L.idx.map(r=>{const u=L.uc.find(x=>x.bh===r.bh&&String(x.d)===String(r.d));
+ const d2=L.ds.find(x=>x.bh===r.bh&&String(x.d)===String(r.d));
+ const c2=L.cons.find(x=>x.bh===r.bh&&String(x.d)===String(r.d));
+ return `<tr><td>${esc(r.bh)}</td><td>${esc(r.sm)}</td><td>${esc(r.d)}</td><td>${esc(r.nmc)||"—"}</td>
+ <td>${esc(r.ll)||"—"}</td><td>${esc(r.pi)||"—"}</td><td>${esc(r.sand)||"—"}</td><td>${esc(r.silt)||"—"}</td>
+ <td>${esc(r.clay)||"—"}</td><td>${esc(r.gs)||"—"}</td><td>${u?esc(u.qu):"—"}</td>
+ <td>${d2?esc(d2.phi):"—"}</td><td>${c2?esc(c2.cc):"—"}</td></tr>`;}))}
+<p class="cap">Consolidated summary of all laboratory results</p>`:
+"<p style=\"margin-top:20px\"><i>Laboratory results are to be appended to this summary from the laboratory sheets.</i></p>"}
+</td></tr></tbody></table>`;
+}
+function renderReport(){
+  $("reportView").innerHTML = reportHTML();
+  requestAnimationFrame(()=>{
+    const el=$("reportView"), PAGE=980;
+    const breaks=el.querySelectorAll(".pagebreak").length;
+    const est=Math.max(breaks+1, Math.ceil(el.scrollHeight/PAGE));
+    const b=$("pageBadge"); if(!b) return;
+    const okp = est>=30;
+    b.className = "vbox "+(okp?"pass":"marg");
+    b.innerHTML=`<h4>আনুমানিক প্রিন্ট দৈর্ঘ্য</h4><div class="big">${est} পৃষ্ঠা</div>
+      <div class="sub">${breaks+1} টি নির্ধারিত page break · লক্ষ্য ৩০ · <b>${okp?"লক্ষ্য পূরণ":"আরও দরকার"}</b></div>`;
+  });
+}
+
+/* ---------------- export ---------------- */
+function dl(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500); }
+function exportWord(){
+  const top=lhOn()?(N("lhtop")||20):11, bot=lhOn()?(N("lhbot")||14):6;
+  const hdrHtml = "";
+  const css=`@page{size:A4;margin:${top}mm 18mm ${bot}mm 18mm}
+  .lh-space,.lh-foot{height:0;font-size:0;line-height:0}
+  .pagebreak{page-break-after:always}
+  .runfoot{border-top:0.75pt solid #1B3A6B;padding-top:1.5pt;font-size:6pt;color:#333;font-family:Arial,sans-serif;line-height:1.15}
+  .ft-logo{height:21pt;float:left;margin-right:5pt}
+  table.pagewrap{width:100%;border-collapse:collapse}
+  table.pagewrap>tbody>tr>td,table.pagewrap>tfoot>tr>td{border:none;padding:0}
+  .ft-lbl{font-weight:bold;color:#1B3A6B}
+  .ft-tag{color:#2E7D32}
+  body{font-family:'Times New Roman',serif;font-size:11pt;line-height:1.5}
+  h1{font-size:17pt;text-align:center}h2{font-size:12.5pt;color:#16323F;border-bottom:1px solid #999;padding-bottom:3px}
+  h3{font-size:11.5pt;color:#415C68}table{border-collapse:collapse;width:100%;font-size:9pt;font-family:Arial,sans-serif}
+  th{background:#16323F;color:#fff;border:1px solid #16323F;padding:4px}
+  td{border:1px solid #bbb;padding:3px;text-align:center}
+  .cap{text-align:center;font-size:9pt;font-style:italic;color:#444}`;
+  dl(new Blob(["\ufeff<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><style>"+css+"</style></head><body>"+$("reportView").innerHTML+"</body></html>"],
+    {type:"application/msword"}), ((V("repno")||"Subsoil").replace(/[^A-Za-z0-9_-]+/g,"_"))+"_Report.doc");
+}
+function exportCsv(){
+  const A=allComputed();
+  const head=["Borehole","Depth_ft","Description","Type","N_field","Gamma_pcf","Eff_stress_psf","CR","N60","CN","N1_60","Class","Phi_deg","cu_tsf","Refusal"];
+  const lines=[head.join(",")];
+  A.forEach(h=>h.rows.forEach(r=>lines.push([h.name,r.d,`"${String(r.desc||"").replace(/"/g,'""')}"`,r.st,r.n,
+    fmt(r.g,0),fmt(r.svp,0),fmt(r.CR,2),fmt(r.N60,2),fmt(r.CN,3),fmt(r.N160,2),r.cls,
+    r.phi!==null?fmt(r.phi,1):"",r.cuT!==null?fmt(r.cuT,3):"",r.refusal?"YES":""].join(","))));
+  dl(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),((V("repno")||"borelog").replace(/[^A-Za-z0-9_-]+/g,"_"))+".csv");
+}
+function projectData(){ const meta={}; FIELDS.forEach(k=>meta[k]=CHK_FIELDS.includes(k)?Chk(k):V(k));
+  return {app:"BoreLog2",version:3,meta,holes:S.holes,lab:S.lab,logo:S.logo}; }
+function saveProject(){
+  renderReport();
+  const data=JSON.stringify(projectData());
+  const css=`body{font-family:'Iowan Old Style',Palatino,Georgia,serif;font-size:14px;line-height:1.6;color:#111;margin:0;padding:26px 34px;background:#fff}
+h1{font-size:22px;text-align:center;margin:0 0 4px}
+h2{font-size:15px;color:#1B3A6B;border-bottom:1px solid #C3CFD2;padding-bottom:4px;margin:24px 0 9px}
+h3{font-size:13px;margin:15px 0 6px;color:#44577A}
+table{border-collapse:collapse;width:100%;font-size:11.5px;font-family:Arial,Helvetica,sans-serif;margin:9px 0}
+th{background:#1B3A6B;color:#fff;font-size:11px;padding:5px;border:1px solid #1B3A6B}
+td{border:1px solid #DDE5E6;padding:4px;text-align:center}
+.cap{text-align:center;font-size:11.5px;font-style:italic;color:#555;margin:2px 0 15px}
+.titlepage{display:flex;flex-direction:column;text-align:center;min-height:900px}
+.tp-bottom{margin-top:auto}
+.reportedby img{height:86px;margin-bottom:4px}
+.rb-name{font-size:19px;font-weight:bold;color:#1B3A6B}
+.rb-tag{font-size:10.5px;color:#2E7D32;font-family:Arial,sans-serif}
+.rb-addr{font-size:10.5px;font-family:Arial,sans-serif;margin-top:3px}
+table.pagewrap{table-layout:fixed}
+table.pagewrap>tbody>tr>td,table.pagewrap>tfoot>tr>td{border:none;padding:0;text-align:left}
+.runfoot{border-top:1.2px solid #1B3A6B;padding-top:5px;display:flex;align-items:center;gap:6px;
+  font-family:Arial,sans-serif;font-size:9px;color:#333;line-height:1.25}
+.ft-logo{height:36px;flex:0 0 auto}.ft-text{flex:1 1 auto}
+.ft-lbl{font-weight:700;color:#1B3A6B}.ft-tag{color:#2E7D32}
+.pagebreak{height:0;border-top:1px dashed #C3CFD2;margin:26px 0}
+.lh-space,.lh-foot{height:0}
+@media print{@page{size:A4;margin:11mm 15mm 5mm 15mm}
+ body{padding:0}.pagebreak{page-break-after:always;border:none;margin:0;height:0}
+ table.pagewrap>tfoot{display:table-footer-group}
+ .titlepage{min-height:262mm;page-break-after:always}
+ .reportedby img{height:24mm}.ft-logo{height:7.5mm}
+ .runfoot{font-size:6pt;padding-top:0.6mm;line-height:1.2}
+ thead{display:table-header-group}tr{page-break-inside:avoid}}`;
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<title>${esc(V("project")||"Sub-soil investigation report")}</title>
+<style>${css}</style></head><body>
+${$("reportView").innerHTML}
+<script type="application/json" id="borelog-data">${data.replace(/</g,"\\u003c")}<\/script>
+</body></html>`;
+  dl(new Blob([html],{type:"text/html;charset=utf-8"}),
+     ((V("repno")||"project").replace(/[^A-Za-z0-9_-]+/g,"_"))+".html"); }
+function openProject(file){ const fr=new FileReader();
+  fr.onload=()=>{ try{ const o=JSON.parse(fr.result);
+      if(o.meta) FIELDS.forEach(k=>{ if(o.meta[k]!==undefined&&$("f_"+k)){ if(CHK_FIELDS.includes(k)) $("f_"+k).checked=!!o.meta[k]; else $("f_"+k).value=o.meta[k]; } });
+      S.holes = Array.isArray(o.holes)?o.holes : (Array.isArray(o.rows)?[{name:"BH-01",rows:o.rows}]:[]);
+      S.lab = o.lab && o.lab.idx ? o.lab : emptyLab();
+      S.logo = o.logo!==undefined ? o.logo : HG_LOGO;
+      S.active=0; refresh();
+    }catch(e){ alert("ফাইলটি পড়া গেল না — BoreLog থেকে সেভ করা .html বা .json ফাইল দিন।"); } };
+  fr.readAsText(file); }
+
+/* ---------------- row / hole ops ---------------- */
+function addRow(k){ const h=S.holes[S.active]; if(!h) return;
+  const step=N("int")||5;
+  for(let i=0;i<(k||1);i++){ const last=h.rows.length?num(h.rows[h.rows.length-1].d):0;
+    h.rows.push({d:(last||0)+step,desc:"",st:"Cohesive",n:"",g:""}); }
+  refresh(); }
+function addHole(){ const n=S.holes.length+1;
+  S.holes.push({name:"BH-"+String(n).padStart(2,"0"),rows:[]});
+  S.active=S.holes.length-1; addRow(6); }
+
+/* ---------------- wiring ---------------- */
+function applyLetterhead(){
+  const on = V("lh")!=="no";
+  document.body.classList.toggle("letterhead", on);
+  document.documentElement.style.setProperty("--lh-top",(N("lhtop")||0)+"mm");
+  document.documentElement.style.setProperty("--lh-bot",(N("lhbot")||0)+"mm");
+  const p=$("logoPrev");
+  if(p) p.innerHTML = S.logo
+    ? `<img src="${S.logo}" alt="logo" style="max-height:70px;border:1px solid var(--rule);padding:5px;background:#fff;border-radius:3px;vertical-align:middle">
+       <button id="btnDelLogo" style="margin-left:10px">সরান</button>
+       <button id="btnResetLogo" style="margin-left:6px">Heritage লোগো ফেরত</button>`
+    : `<p class="hint" style="margin:0;display:inline-block">লোগো সরানো হয়েছে।</p>
+       <button id="btnResetLogo" style="margin-left:10px">Heritage লোগো ফেরত</button>`;
+}
+function refresh(){ applyLetterhead(); renderTable(); renderLab(); renderBearing(); renderSettle(); renderPile(); renderReport(); }
+
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset && t.dataset.f!==undefined){
+    S.holes[S.active].rows[+t.dataset.i][t.dataset.f]=t.value;
+    const pos=t.selectionStart, f=t.dataset.f, i=t.dataset.i;
+    refresh();
+    const again=document.querySelector(`[data-i="${i}"][data-f="${f}"]`);
+    if(again){ again.focus(); try{ again.setSelectionRange(pos,pos); }catch(_){} }
+  } else if(t.dataset && t.dataset.lab!==undefined){
+    S.lab[t.dataset.lab][+t.dataset.li][t.dataset.lf]=t.value;
+    const pos=t.selectionStart, k=t.dataset.lab, i=t.dataset.li, f=t.dataset.lf;
+    refresh();
+    const again=document.querySelector(`[data-lab="${k}"][data-li="${i}"][data-lf="${f}"]`);
+    if(again){ again.focus(); try{ again.setSelectionRange(pos,pos); }catch(_){} }
+  } else if(t.id && t.id.startsWith("f_")) refresh();
+});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.labdel!==undefined){ S.lab[b.dataset.labdel].splice(+b.dataset.li,1); refresh(); }
+  else if(b.id==="btnAddIdx") addLabRow("idx");
+  else if(b.id==="btnAddUc") addLabRow("uc");
+  else if(b.id==="btnAddDs") addLabRow("ds");
+  else if(b.id==="btnAddCon") addLabRow("cons");
+  else if(b.dataset.del!==undefined){ S.holes[S.active].rows.splice(+b.dataset.del,1); refresh(); }
+  else if(b.dataset.h!==undefined){ S.active=+b.dataset.h; refresh(); }
+  else if(b.id==="btnDelLogo"){ S.logo=null; refresh(); }
+  else if(b.id==="btnResetLogo"){ S.logo=HG_LOGO; refresh(); }
+  else if(b.id==="btnAddHole") addHole();
+  else if(b.id==="btnDelHole"){ if(S.holes.length>1&&confirm(S.holes[S.active].name+" মুছে ফেলা হবে?")){
+      S.holes.splice(S.active,1); S.active=0; refresh(); } }
+});
+$("tabs").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-t]"); if(!b) return;
+  [...$("tabs").children].forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id===b.dataset.t));
+  if(b.dataset.t==="p7") renderReport();
+});
+$("btnAdd").onclick=()=>addRow(1);
+$("btnAdd5").onclick=()=>addRow(5);
+$("btnSample").onclick=loadSample;
+$("btnReal").onclick=loadReal;
+$("btnClear").onclick=()=>{ if(confirm("সব ডেটা মুছে ফেলা হবে। নিশ্চিত?")){
+  S.holes=[{name:"BH-01",rows:[]}]; S.active=0; S.lab=emptyLab(); addRow(6); } };
+$("btnSave").onclick=saveProject;
+$("btnCsv").onclick=exportCsv;
+$("btnWord").onclick=()=>{ renderReport(); exportWord(); };
+$("btnPrint").onclick=()=>{
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p7"));
+  [...$("tabs").children].forEach(x=>x.setAttribute("aria-selected",x.dataset.t==="p7"));
+  renderReport(); setTimeout(()=>window.print(),150); };
+$("fileOpen").onchange=e=>{ if(e.target.files[0]) openProject(e.target.files[0]); };
+$("logoFile").onchange=e=>{ const f=e.target.files[0]; if(!f) return;
+  if(f.size>600000){ alert("লোগো ফাইলটি বড় (৬০০ KB-র বেশি)। ছোট ছবি ব্যবহার করুন।"); return; }
+  const fr=new FileReader(); fr.onload=()=>{ S.logo=fr.result; refresh(); }; fr.readAsDataURL(f); };
+
+loadReal();
+</script>
+</body>
+</html>
