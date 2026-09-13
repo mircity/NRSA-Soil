@@ -1,0 +1,6 @@
+{
+  "name":"borelog2-windows","version":"1.0.0","description":"BoreLog 2 — Subsoil Investigation Suite for Windows",
+  "main":"main.js","author":"BoreLog 2","license":"UNLICENSED","private":true,
+  "scripts":{"start":"electron .","dist":"electron-builder --win","dist:portable":"electron-builder --win portable","dist:installer":"electron-builder --win nsis","dist:all":"electron-builder --win nsis portable"},
+  "devDependencies":{"electron":"44.3.0","electron-builder":"^27.0.0"},
+  "build":{"appId":"com.borelog2.subsoil","productName":"BoreLog 2","artifactName":"BoreLog-2-${version}-${arch}.${ext}","asar":true,"compression":"maximum","files":["app/**/*","main.js","preload.js","package.json"],"directories":{"output":"dist"},"win":{"target":[{"target":"nsis","arch":["x64"]},{"target":"portable","arch":["x64"]}],"publisherName":"BoreLog 2","legalTrademarks":"BoreLog 2"},"nsis":{"oneClick":false,"perMachine":false,"allowToChangeInstallationDirectory":true,"createDesktopShortcut":true,"createStartMenuShortcut":true,"shortcutName":"BoreLog 2","runAfterFinish":true}}}
